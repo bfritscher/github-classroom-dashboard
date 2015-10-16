@@ -1,0 +1,23 @@
+body {
+	font-family: 'Roboto', sans-serif;
+}
+a {
+	text-decoration: none;
+}
+
+.correct, .correct a{
+	color: green;
+}
+
+.wrong, .wrong a{
+	color: red;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+tbody td {
+	border: 1px solid #333;
+	padding: 2px;
+}

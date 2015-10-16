@@ -1,0 +1,60 @@
+<p>{{main.ghApi.rateLimit.remaining}} / {{main.ghApi.rateLimit.limit}} reset in {{main.ghApi.rateLimit.resetCoutdown()}} min</p>
+<a href="https://github.com/login/oauth/authorize?client_id=0f49b767798fd5815a80&scope=read:org,public_repo&state=test">login</a>
+<button ng-click="main.refresh()">refresh data</button>
+<label><input type="checkbox" ng-model="debug"> debug</label>
+<table>
+	<thead>
+		<tr>
+			<th></th>
+			<th>nom</th>
+			<th>master</th>
+			<th>gh-pages</th>
+			<th>webIsDist</th>
+			<th>readme</th>
+			<th>release 2.0.0</th>
+			<th ng-if="debug">branches</th>
+			<th ng-if="debug">tags</th>
+			<th ng-if="debug">commits</th>
+			<th>bootstrap</th>
+			<th>structure/code</th>
+			<th>1 jquery plugin</th>
+			<th>Text readme</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="a in main.assignments">
+			<td>{{$index + 1}}</td>
+			<td><span ng-repeat="u in a.users">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span></span></td>
+
+			<td ng-class="{correct: a.hasMaster, wrong: !a.hasMaster}">
+				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/master">{{a.hasMaster}}</a>
+				</td>
+			<td ng-class="{correct: a.hasGhPages, wrong: !a.hasGhPages}">
+				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/gh-pages">{{a.hasGhPages}}</a>
+			</td>
+			<td ng-class="{correct: a.hasVendor, wrong: !a.hasVendor}">
+				<a target="_blank" ng-href="https://heg-web.github.io/{{a.name}}">{{a.hasVendor}}</a>
+			</td>
+			<td ng-class="{correct: a.hasReadme, wrong: !a.hasReadme}">
+				<a target="_blank" ng-href="{{a.readmeUrl}}">{{a.hasReadme}}</a>
+			</td>
+			<td ng-class="{correct: a.hasRelease, wrong: !a.hasRelease}">
+				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/{{a.releaseSha}}">{{a.hasRelease}}</a>
+			</td>
+			<td ng-if="debug" ng-click="main.commits=a.commits">{{a.commits.length}}</td>
+			<td ng-if="debug">{{a.branches}}</td>
+			<td ng-if="debug">{{a.releases}}</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</tbody>
+</table>
+<div>
+	<div ng-repeat="c in main.commits">
+		<i>{{c.commit.author.name}}</i>
+		{{c.commit.author.date | date}}
+		<a target="_blank" ng-href="{{c.html_url}}">{{c.commit.message}}</a>
+	</div>
+</div>
