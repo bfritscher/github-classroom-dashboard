@@ -3,6 +3,7 @@
 <a href="https://github.com/login/oauth/authorize?client_id=0f49b767798fd5815a80&scope=read:org,public_repo&state=test">login</a>
 <button ng-click="main.refresh()">refresh data</button>
 <label><input type="checkbox" ng-model="debug"> debug</label>
+<label><input type="checkbox" ng-model="showpic"> showpic</label>
 <h2>Checks</h2>
 <table>
 	<thead>
@@ -26,7 +27,10 @@
 	<tbody>
 		<tr ng-repeat="a in main.assignments">
 			<td>{{$index + 1}}</td>
-			<td><span ng-repeat="u in a.users">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span></span></td>
+			<td>
+				<div class="student" ng-repeat="u in a.users">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span>
+				<div ng-if="showpic"><img ng-src="{{main.loginToPic(u.login)}}" /></div></div>
+			</td>
 
 			<td ng-class="{correct: a.hasMaster, wrong: !a.hasMaster}">
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/master">{{a.hasMaster}}</a>

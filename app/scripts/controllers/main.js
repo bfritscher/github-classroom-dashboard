@@ -12,6 +12,12 @@ angular.module('githubClassroomDashboardApp')
     var main = this;
     main.ghApi = ghApi;
 
+    var lookup = {};
+    $http.get('/preview/lookup.json')
+      .then( function(response){
+        lookup = response.data;
+      });
+
     var org = 'heg-web';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
@@ -55,6 +61,10 @@ angular.module('githubClassroomDashboardApp')
       return 'data:text/plain;charset=utf-8,' + encodeURIComponent(Object.keys(main.assignments).reduce(function(list, key){
         return list + 'https://heg-web.github.io/' + main.assignments[key].name + '\n';
       }, ''));
+    };
+
+    main.loginToPic = function(login) {
+      return 'https://amc.ig.he-arc.ch/sdb/images/students/' + lookup[login] + '.jpg'
     };
 
     function checkBranches(r){

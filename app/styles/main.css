@@ -57,3 +57,8 @@ tbody td {
 .preview img:nth-child(4) {
 	width: 45%;
 }
+
+.student img{
+	width: 80px;
+	
+}
