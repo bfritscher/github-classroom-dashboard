@@ -28,4 +28,11 @@ angular
         redirectTo: '/'
       });
     $httpProvider.interceptors.push('apiInterceptor');
-  });
+  })
+  .config( [
+    '$compileProvider',
+    function( $compileProvider )
+    {
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|data):/);
+    }
+]);

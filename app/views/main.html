@@ -1,7 +1,9 @@
+<h1>Classroom Assignment moncv</h1>
 <p>{{main.ghApi.rateLimit.remaining}} / {{main.ghApi.rateLimit.limit}} reset in {{main.ghApi.rateLimit.resetCoutdown()}} min</p>
 <a href="https://github.com/login/oauth/authorize?client_id=0f49b767798fd5815a80&scope=read:org,public_repo&state=test">login</a>
 <button ng-click="main.refresh()">refresh data</button>
 <label><input type="checkbox" ng-model="debug"> debug</label>
+<h2>Checks</h2>
 <table>
 	<thead>
 		<tr>
@@ -12,9 +14,9 @@
 			<th>webIsDist</th>
 			<th>readme</th>
 			<th>release 2.0.0</th>
+			<th ng-if="debug">commits</th>
 			<th ng-if="debug">branches</th>
 			<th ng-if="debug">tags</th>
-			<th ng-if="debug">commits</th>
 			<th>bootstrap</th>
 			<th>structure/code</th>
 			<th>1 jquery plugin</th>
@@ -56,5 +58,16 @@
 		<i>{{c.commit.author.name}}</i>
 		{{c.commit.author.date | date}}
 		<a target="_blank" ng-href="{{c.html_url}}">{{c.commit.message}}</a>
+	</div>
+</div>
+<a ng-href="{{main.getUrls()}}" download="urls.txt">download urls.txt</a>
+
+<h2>Preview</h2>
+<div id="preview">
+	<div class="preview" ng-repeat="a in main.assignments">
+		<a target="_blank" ng-href="https://heg-web.github.io/{{a.name}}">{{a.name}} <span ng-class="{correct: a.hasVendor, wrong: !a.hasVendor}">{{a.hasVendor}}</span></a>
+		<img ng-src="preview/heg-web.github.io!{{a.name}}-320x480.png"/>
+		<img ng-src="preview/heg-web.github.io!{{a.name}}-1024x768.png"/>
+		<img ng-src="preview/heg-web.github.io!{{a.name}}-1600x1200.png"/>
 	</div>
 </div>

@@ -51,6 +51,12 @@ angular.module('githubClassroomDashboardApp')
       });
     };
 
+    main.getUrls = function() {
+      return 'data:text/plain;charset=utf-8,' + encodeURIComponent(Object.keys(main.assignments).reduce(function(list, key){
+        return list + 'https://heg-web.github.io/' + main.assignments[key].name + '\n';
+      }, ''));
+    };
+
     function checkBranches(r){
       r.hasMaster = false;
       r.hasGhPages = false;
