@@ -63,8 +63,8 @@ angular.module('githubClassroomDashboardApp')
       }, ''));
     };
 
-    main.loginToPic = function(login) {
-      return 'https://amc.ig.he-arc.ch/sdb/images/students/' + lookup[login] + '.jpg'
+    main.loginToMatricule = function(login) {
+      return lookup[login];
     };
 
     function checkBranches(r){

@@ -9,6 +9,7 @@
 	<thead>
 		<tr>
 			<th></th>
+			<th ng-if="debug">matricule</th>
 			<th>nom</th>
 			<th>master</th>
 			<th>gh-pages</th>
@@ -27,9 +28,12 @@
 	<tbody>
 		<tr ng-repeat="a in main.assignments">
 			<td>{{$index + 1}}</td>
+			<td ng-if="debug">
+				<div class="student" ng-repeat="u in a.users">{{main.loginToMatricule(u.login)}}</div>
+			</td>
 			<td>
 				<div class="student" ng-repeat="u in a.users">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span>
-				<div ng-if="showpic"><img ng-src="{{main.loginToPic(u.login)}}" /></div></div>
+				<div ng-if="showpic"><img ng-src="https://amc.ig.he-arc.ch/sdb/images/students/{{main.loginToMatricule(u.login)}}.jpg" /></div></div>
 			</td>
 
 			<td ng-class="{correct: a.hasMaster, wrong: !a.hasMaster}">
