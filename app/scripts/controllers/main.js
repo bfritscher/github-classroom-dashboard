@@ -19,19 +19,20 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
+    var classroomProjectPrefix = 'projet-resto-neuch'; //'moncv-';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
 
     main.refresh = function(){
       ghApi.access_token = localStorage.getItem('access_token') || window.prompt('access_token');
       localStorage.setItem('access_token', ghApi.access_token );
-      $http.get(API + 'orgs/' + org + '/repos')
+      $http.get(API + 'orgs/' + org + '/repos?per_page=100') //page=2&
       .then( function(response){
         //TODO: handle multipage
         response.data.filter(function(repo){
-          return repo.name.indexOf('bfritscher') === -1;
+          return repo.name.indexOf('bfritscher') === -1 ;
         }).forEach(function(repo){
-          if(repo.name.indexOf('moncv-') === 0){
+          if(repo.name.indexOf(classroomProjectPrefix) === 0){
             var r = {name: repo.name};
             if(main.assignments.hasOwnProperty(repo.name)){
               r = main.assignments[repo.name];
@@ -65,6 +66,19 @@ angular.module('githubClassroomDashboardApp')
 
     main.loginToMatricule = function(login) {
       return lookup[login];
+    };
+
+    main.commitCount = function(commits, u) {
+        return commits.filter(function(c){
+            return (c.commit.author.name === u.login|| c.commit.author.name === u.name) && c.commit.message.indexOf('Merge') !== 0;
+        }).length;
+    };
+
+    main.getCommiterIndex = function(name) {
+        if (main.commiterIndex.indexOf(name) === -1) {
+            main.commiterIndex.push(name);
+        }
+        return main.commiterIndex.indexOf(name);
     };
 
     function checkBranches(r){
@@ -105,7 +119,7 @@ angular.module('githubClassroomDashboardApp')
       return $http.get(API + 'repos/' + org + '/' + r.name + '/tags')
           .then( function(response){
             r.releases = response.data.map( function( release ) {
-              if(release.name === '2.0.0'){
+              if(release.name === 'FINAL'){
                 r.hasRelease = true;
                 r.releaseSha = release.commit.sha;
               }
@@ -139,13 +153,25 @@ angular.module('githubClassroomDashboardApp')
           });
     }
 
-    function getCommits(r){
-       return $http.get(API + 'repos/' + org + '/' + r.name + '/commits')
+    function getCommitsPage(r, page){
+        return $http.get(API + 'repos/' + org + '/' + r.name + '/commits?per_page=100&page=' + page)
           .then( function(response){
-            r.commits = response.data;
+                r.commits = r.commits.concat(response.data);
+                if(response.headers('link')){
+                   console.log(response.headers('link'));
+                   var match = response.headers('link').match(/page=(\d+)>; rel="(.*?)"/)
+                   if (match[2] === 'next') {
+                       getCommitsPage(r, match[1]);
+                   }
+                }
           }, function(){
             return;
           });
+    }
+
+    function getCommits(r){
+        r.commits = [];
+        return getCommitsPage(r, 1);
     }
 
     function getUser(u){

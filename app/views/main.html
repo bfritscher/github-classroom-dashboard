@@ -9,13 +9,14 @@
 	<thead>
 		<tr>
 			<th></th>
+            <th>Project</th>
 			<th ng-if="debug">matricule</th>
 			<th>nom</th>
 			<th>master</th>
 			<th>gh-pages</th>
 			<th>webIsDist</th>
 			<th>readme</th>
-			<th>release 2.0.0</th>
+			<th>FINAL</th>
 			<th ng-if="debug">commits</th>
 			<th ng-if="debug">branches</th>
 			<th ng-if="debug">tags</th>
@@ -26,14 +27,16 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="a in main.assignments">
+		<tr ng-repeat="(name, a) in main.assignments">
 			<td>{{$index + 1}}</td>
+            <td>{{name}}</td>
 			<td ng-if="debug">
 				<div class="student" ng-repeat="u in a.users">{{main.loginToMatricule(u.login)}}</div>
 			</td>
 			<td>
-				<div class="student" ng-repeat="u in a.users">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span>
-				<div ng-if="showpic"><img ng-src="https://amc.ig.he-arc.ch/sdb/images/students/{{main.loginToMatricule(u.login)}}.jpg" /></div></div>
+				<div class="student" ng-repeat="u in a.users">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span> <b>[{{main.commitCount(a.commits, u)}}]</b>
+				    <div ng-if="showpic"><img ng-src="https://amc.ig.he-arc.ch/sdb/images/students/{{main.loginToMatricule(u.login)}}.jpg" /></div>
+                </div>
 			</td>
 
 			<td ng-class="{correct: a.hasMaster, wrong: !a.hasMaster}">
@@ -51,7 +54,7 @@
 			<td ng-class="{correct: a.hasRelease, wrong: !a.hasRelease}">
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/{{a.releaseSha}}">{{a.hasRelease}}</a>
 			</td>
-			<td ng-if="debug" ng-click="main.commits=a.commits">{{a.commits.length}}</td>
+			<td ng-if="debug" ng-click="main.commiterIndex=[];main.commits=a.commits">{{a.commits.length}}</td>
 			<td ng-if="debug">{{a.branches}}</td>
 			<td ng-if="debug">{{a.releases}}</td>
 			<td></td>
@@ -62,10 +65,10 @@
 	</tbody>
 </table>
 <div>
-	<div ng-repeat="c in main.commits">
+	<div ng-repeat="c in main.commits" class="commiter{{main.getCommiterIndex(c.commit.author.name)}}">
 		<i>{{c.commit.author.name}}</i>
 		{{c.commit.author.date | date}}
-		<a target="_blank" ng-href="{{c.html_url}}">{{c.commit.message}}</a>
+		<a target="_blank" ng-href="{{c.html_url}}" ng-class="{'merge': c.commit.message.indexOf('Merge') == 0}">{{c.commit.message}}</a>
 	</div>
 </div>
 <a ng-href="{{main.getUrls()}}" download="urls.txt">download urls.txt</a>

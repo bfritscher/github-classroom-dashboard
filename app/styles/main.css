@@ -60,5 +60,17 @@ tbody td {
 
 .student img{
 	width: 80px;
-	
+
+}
+
+.commiter0 {
+    background-color: #29B6F6;
+}
+
+.commiter1 {
+    background-color: #B39DDB;
+}
+
+.merge {
+    background-color: orange
 }
