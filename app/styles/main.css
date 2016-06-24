@@ -38,7 +38,6 @@ tbody td {
 	font-size: 12pt;
 	color: black;
 	font-weight: bold;
-	display: block;
 	padding: 4px 0;
 }
 
@@ -46,15 +45,15 @@ tbody td {
 	vertical-align: top;
 }
 
-.preview img:nth-child(2) {
+.preview img:nth-child(1) {
 	width: 20%;
 }
 
-.preview img:nth-child(3) {
+.preview img:nth-child(2) {
 	width: 33%;
 }
 
-.preview img:nth-child(4) {
+.preview img:nth-child(3) {
 	width: 45%;
 }
 

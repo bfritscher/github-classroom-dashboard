@@ -19,9 +19,18 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
-    var classroomProjectPrefix = 'projet-resto-neuch'; //'moncv-';
+    var classroomProjectPrefix = 'moncv-';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
+
+    main.before = false;
+    main.switchPreview = function() {
+      main.before = !main.before;
+      Object.keys(main.assignments).forEach(function(k){
+        var a = main.assignments[k];
+        a.before = main.before;
+      });
+    };
 
     main.refresh = function(){
       ghApi.access_token = localStorage.getItem('access_token') || window.prompt('access_token');
@@ -69,9 +78,12 @@ angular.module('githubClassroomDashboardApp')
     };
 
     main.commitCount = function(commits, u) {
-        return commits.filter(function(c){
-            return (c.commit.author.name === u.login|| c.commit.author.name === u.name) && c.commit.message.indexOf('Merge') !== 0;
-        }).length;
+        if (commits) {
+            return commits.filter(function(c){
+                return (c.commit.author.name === u.login|| c.commit.author.name === u.name) && c.commit.message.indexOf('Merge') !== 0;
+            }).length;
+        }
+        return 0;
     };
 
     main.getCommiterIndex = function(name) {
@@ -119,7 +131,7 @@ angular.module('githubClassroomDashboardApp')
       return $http.get(API + 'repos/' + org + '/' + r.name + '/tags')
           .then( function(response){
             r.releases = response.data.map( function( release ) {
-              if(release.name === 'FINAL'){
+              if(release.name === '2.0.0'){
                 r.hasRelease = true;
                 r.releaseSha = release.commit.sha;
               }
@@ -159,7 +171,7 @@ angular.module('githubClassroomDashboardApp')
                 r.commits = r.commits.concat(response.data);
                 if(response.headers('link')){
                    console.log(response.headers('link'));
-                   var match = response.headers('link').match(/page=(\d+)>; rel="(.*?)"/)
+                   var match = response.headers('link').match(/page=(\d+)>; rel="(.*?)"/);
                    if (match[2] === 'next') {
                        getCommitsPage(r, match[1]);
                    }
