@@ -19,7 +19,7 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
-    var classroomProjectPrefix = 'moncv-';
+    var classroomProjectPrefix = 'projet-';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
 
@@ -39,7 +39,7 @@ angular.module('githubClassroomDashboardApp')
       .then( function(response){
         //TODO: handle multipage
         response.data.filter(function(repo){
-          return repo.name.indexOf('bfritscher') === -1 ;
+          return repo.name.indexOf('demo') === -1 ;
         }).forEach(function(repo){
           if(repo.name.indexOf(classroomProjectPrefix) === 0){
             var r = {name: repo.name};
@@ -115,7 +115,7 @@ angular.module('githubClassroomDashboardApp')
       return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/scripts?ref=gh-pages')
           .then( function(response){
             for(var i=0; i < response.data.length; i++){
-              if(response.data[i].name.indexOf('vendor.') === 0){
+              if(response.data[i].name.indexOf('vendor') === 0){
                 r.hasVendor = true;
                 return;
               }
