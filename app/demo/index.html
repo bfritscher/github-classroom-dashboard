@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc4/angular-material.min.css">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body ng-app="app" ng-controller="appController as $ctrl">
+    <md-toolbar class="md-whiteframe-1dp">
+        <div class="md-toolbar-tools">
+            <span>643-1.1b Projet de technologies WEB de présentation</span>
+        </div>
+    </md-toolbar>
+    <md-content>
+        <md-tabs md-selected="$ctrl.idxYear" class="md-whiteframe-1dp">
+            <md-tab ng-repeat="(year, value) in $ctrl.data"  md-on-select="$ctrl.year = year">{{year}}</md-tab>
+        </md-tabs>
+        <md-tabs md-selected="$ctrl.idxT" class="md-whiteframe-1dp">
+            <md-tab ng-repeat="(t, a) in $ctrl.data[$ctrl.year]" md-on-select="$ctrl.t = t">{{t}}</md-tab>
+        </md-tabs>
+        <md-tabs md-selected="$ctrl.idxPt" class="md-whiteframe-1dp" style="margin-bottom:20px">
+            <md-tab ng-repeat="(pt, projects) in $ctrl.data[$ctrl.year][$ctrl.t]" md-on-select="$ctrl.pt = pt">{{pt}}</md-tab>
+        </md-tabs>
+    </md-content>
+    <md-content class="md-padding" layout="row" layout-wrap layout-align="space-around start">
+        <div class="card md-whiteframe-1dp" ng-repeat="p in $ctrl.data[$ctrl.year][$ctrl.t][$ctrl.pt]">
+            <div class="title"><h2><a layout="row" target="_blank" ng-href="{{$ctrl.year}}/{{$ctrl.t}}/sites/{{$ctrl.pt}}-{{p}}-gh-pages/">{{p}}<span flex></span><md-icon>open_in_new</md-icon></a></h2></div>
+            <div class="preview" >
+                <img ng-src="{{$ctrl.year}}/{{$ctrl.t}}/thumbs/heg-web.github.io!{{$ctrl.pt}}-{{p}}-320x480.png"/>
+                <img ng-src="{{$ctrl.year}}/{{$ctrl.t}}/thumbs/heg-web.github.io!{{$ctrl.pt}}-{{p}}-1024x768.png"/>
+                <img ng-src="{{$ctrl.year}}/{{$ctrl.t}}/thumbs/heg-web.github.io!{{$ctrl.pt}}-{{p}}-1600x1200.png"/>
+            </div>
+        </div>
+
+    </md-content>
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+     <script>
+       !function(A,n,g,u,l,a,r){A.GoogleAnalyticsObject=l,A[l]=A[l]||function(){
+       (A[l].q=A[l].q||[]).push(arguments)},A[l].l=+new Date,a=n.createElement(g),
+       r=n.getElementsByTagName(g)[0],a.src=u,r.parentNode.insertBefore(a,r)
+       }(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-55173430-3');
+       ga('send', 'pageview');
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-messages.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc4/angular-material.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -19,7 +19,7 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
-    var classroomProjectPrefix = 'projet-';
+    var classroomProjectPrefix = '';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
 
