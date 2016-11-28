@@ -19,7 +19,7 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
-    var classroomProjectPrefix = '';
+    var classroomProjectPrefix = 'moncv-';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
 
@@ -39,7 +39,7 @@ angular.module('githubClassroomDashboardApp')
       .then( function(response){
         //TODO: handle multipage
         response.data.filter(function(repo){
-          return repo.name.indexOf('demo') === -1 ;
+          return !(repo.name.indexOf('cfrancillon') !== -1 || repo.name.indexOf('bfritscher') !== -1);
         }).forEach(function(repo){
           if(repo.name.indexOf(classroomProjectPrefix) === 0){
             var r = {name: repo.name};
@@ -53,6 +53,8 @@ angular.module('githubClassroomDashboardApp')
               return checkBranches(r);
             }).then(function(){
               return checkGhPagesVendor(r);
+            }).then(function(){
+              return checkMasterSrc(r);
             }).then(function(){
               return checkReleases(r);
             }).then(function(){
@@ -117,6 +119,22 @@ angular.module('githubClassroomDashboardApp')
             for(var i=0; i < response.data.length; i++){
               if(response.data[i].name.indexOf('vendor') === 0){
                 r.hasVendor = true;
+                return;
+              }
+            }
+          }, function(){
+            return;
+          });
+    }
+
+    function checkMasterSrc(r){
+      r.isMasterSrc = false;
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?ref=master')
+          .then( function(response){
+            for(var i=0; i < response.data.length; i++){
+              console.log(response.data[i].name);
+              if(response.data[i].name.indexOf('package.json') === 0){
+                r.isMasterSrc = true;
                 return;
               }
             }

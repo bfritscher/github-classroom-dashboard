@@ -13,6 +13,7 @@
 			<th ng-if="debug">matricule</th>
 			<th>nom</th>
 			<th>master</th>
+			<th>masterIsSrc</th>
 			<th>gh-pages</th>
 			<th>webIsDist</th>
 			<th>readme</th>
@@ -41,6 +42,9 @@
 
 			<td ng-class="{correct: a.hasMaster, wrong: !a.hasMaster}">
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/master">{{a.hasMaster}}</a>
+				</td>
+			<td ng-class="{correct: a.isMasterSrc, wrong: !a.isMasterSrc}">
+				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/master">{{a.isMasterSrc}}</a>
 				</td>
 			<td ng-class="{correct: a.hasGhPages, wrong: !a.hasGhPages}">
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/gh-pages">{{a.hasGhPages}}</a>
