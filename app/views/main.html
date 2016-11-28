@@ -18,6 +18,7 @@
 			<th>webIsDist</th>
 			<th>readme</th>
 			<th>2.0.0</th>
+			<th>title</th>
 			<th ng-if="debug">commits</th>
 			<th ng-if="debug">branches</th>
 			<th ng-if="debug">tags</th>
@@ -57,6 +58,10 @@
 			</td>
 			<td ng-class="{correct: a.hasRelease, wrong: !a.hasRelease}">
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/{{a.releaseSha}}">{{a.hasRelease}}</a>
+			</td>
+			<td>
+				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/{{a.releaseSha}}/app/scripts/main.js">{{a.title}}</a>
+
 			</td>
 			<td ng-if="debug" ng-click="main.commiterIndex=[];main.commits=a.commits">{{a.commits.length}}</td>
 			<td ng-if="debug">{{a.branches}}</td>

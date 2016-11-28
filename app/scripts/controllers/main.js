@@ -62,6 +62,8 @@ angular.module('githubClassroomDashboardApp')
             }).then(function(){
               return getCommits(r);
             }).then(function(){
+              return checkTitle(r);
+            }).then(function(){
               localStorage.setItem('assignments', JSON.stringify(main.assignments));
             });
           }
@@ -137,6 +139,20 @@ angular.module('githubClassroomDashboardApp')
                 r.isMasterSrc = true;
                 return;
               }
+            }
+          }, function(){
+            return;
+          });
+    }
+
+    var regexTitle = /title>(.*?)<\/title/g;
+    function checkTitle(r){
+      r.title = false;
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/app/index.html?ref=master')
+          .then( function(response){
+            var match = regexTitle.exec(atob(response.data.content));
+            if(match.length > 1) {
+              r.title = match[1];
             }
           }, function(){
             return;
