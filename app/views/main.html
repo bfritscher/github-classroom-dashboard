@@ -60,7 +60,7 @@
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/{{a.releaseSha}}">{{a.hasRelease}}</a>
 			</td>
 			<td>
-				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/{{a.releaseSha}}/app/scripts/main.js">{{a.title}}</a>
+				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/blob/{{a.releaseSha}}master/src/main.js">{{a.title}}</a>
 
 			</td>
 			<td ng-if="debug" ng-click="main.commiterIndex=[];main.commits=a.commits">{{a.commits.length}}</td>

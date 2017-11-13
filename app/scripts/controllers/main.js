@@ -116,10 +116,10 @@ angular.module('githubClassroomDashboardApp')
 
     function checkGhPagesVendor(r){
       r.hasVendor = false;
-      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/scripts?ref=gh-pages')
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/static/js/?branch=gh-pages')
           .then( function(response){
             for(var i=0; i < response.data.length; i++){
-              if(response.data[i].name.indexOf('vendor') === 0){
+              if(response.data[i].name.indexOf('app') === 0){
                 r.hasVendor = true;
                 return;
               }
@@ -131,7 +131,7 @@ angular.module('githubClassroomDashboardApp')
 
     function checkMasterSrc(r){
       r.isMasterSrc = false;
-      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?ref=master')
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?branch=master')
           .then( function(response){
             for(var i=0; i < response.data.length; i++){
               console.log(response.data[i].name);
@@ -148,10 +148,10 @@ angular.module('githubClassroomDashboardApp')
     var regexTitle = /title>(.*?)<\/title/g;
     function checkTitle(r){
       r.title = false;
-      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/app/index.html?ref=master')
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/index.html?branch=master')
           .then( function(response){
             var match = regexTitle.exec(atob(response.data.content));
-            if(match.length > 1) {
+            if(match) {
               r.title = match[1];
             }
           }, function(){
