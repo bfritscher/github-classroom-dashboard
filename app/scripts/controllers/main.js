@@ -8,7 +8,7 @@
  * Controller of the githubClassroomDashboardApp
  */
 angular.module('githubClassroomDashboardApp')
-  .controller('MainCtrl', function ($http, ghApi) {
+  .controller('MainCtrl', function ($http, ghApi, $scope) {
     var main = this;
     main.ghApi = ghApi;
 
@@ -19,7 +19,7 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
-    var classroomProjectPrefix = 'moncv-';
+    var classroomProjectPrefix = 'projet-';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
 
@@ -30,6 +30,10 @@ angular.module('githubClassroomDashboardApp')
         var a = main.assignments[k];
         a.before = main.before;
       });
+    };
+
+    $scope.noBot = function(user) {
+      return !user.login.includes('heg-web-bot');
     };
 
     main.refresh = function(){
@@ -116,7 +120,7 @@ angular.module('githubClassroomDashboardApp')
 
     function checkGhPagesVendor(r){
       r.hasVendor = false;
-      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/static/js/?branch=gh-pages')
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/js?ref=gh-pages')
           .then( function(response){
             for(var i=0; i < response.data.length; i++){
               if(response.data[i].name.indexOf('app') === 0){
@@ -131,10 +135,9 @@ angular.module('githubClassroomDashboardApp')
 
     function checkMasterSrc(r){
       r.isMasterSrc = false;
-      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?branch=master')
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?ref=master')
           .then( function(response){
             for(var i=0; i < response.data.length; i++){
-              console.log(response.data[i].name);
               if(response.data[i].name.indexOf('package.json') === 0){
                 r.isMasterSrc = true;
                 return;
@@ -148,7 +151,7 @@ angular.module('githubClassroomDashboardApp')
     var regexTitle = /title>(.*?)<\/title/g;
     function checkTitle(r){
       r.title = false;
-      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/index.html?branch=master')
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/index.html?ref=gh-pages')
           .then( function(response){
             var match = regexTitle.exec(atob(response.data.content));
             if(match) {
