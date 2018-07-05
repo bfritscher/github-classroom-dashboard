@@ -36,7 +36,7 @@
 				<div class="student" ng-repeat="u in a.users">{{main.loginToMatricule(u.login)}}</div>
 			</td>
 			<td>
-				<div class="student" ng-repeat="u in a.users">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span> <b>[{{main.commitCount(a.commits, u)}}]</b>
+				<div class="student" ng-repeat="u in a.users |filter:noBot">{{u.name}} <span ng-if="!u.name || debug">({{u.login}})</span> <b>[{{main.commitCount(a.commits, u)}}]</b>
 				    <div ng-if="showpic"><img ng-src="https://amc.ig.he-arc.ch/sdb/images/students/{{main.loginToMatricule(u.login)}}.jpg" /></div>
                 </div>
 			</td>
