@@ -18,7 +18,7 @@ const results = folders.map((folder) => {
     const zipName = getFirstFile('.zip', files);
     let isZipNameValid = false
     try {
-        isZipNameValid = zipName.split('.')[0].split('_')[1].toUpperCase() === name[0].toUpperCase();
+        isZipNameValid = zipName.split('.')[0].split('_')[0].toUpperCase() === name[0].toUpperCase();
     }  catch (e) {
     }
     let isReadme = false;
