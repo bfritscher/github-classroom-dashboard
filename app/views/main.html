@@ -4,6 +4,8 @@
 <button ng-click="main.refresh()">refresh data</button>
 <label><input type="checkbox" ng-model="debug"> debug</label>
 <label><input type="checkbox" ng-model="showpic"> showpic</label>
+<label><input placeholder="prefix" type="text" ng-change="main.saveProjectPrefix()" ng-model="main.classroomProjectPrefix"></label>
+<button ng-click="main.clearAssignments()">clear</button>
 <h2>Checks</h2>
 <table>
 	<thead>

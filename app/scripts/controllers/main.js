@@ -26,9 +26,16 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
-    var classroomProjectPrefix = 'moncv-';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
+    main.classroomProjectPrefix = localStorage.getItem('classroomProjectPrefix');
+    main.saveProjectPrefix = function() {
+      console.log( main.classroomProjectPrefix)
+      localStorage.setItem('classroomProjectPrefix', main.classroomProjectPrefix);
+    };
+    main.clearAssignments = function() {
+      main.assignments = {};
+    };
 
     main.before = false;
     main.switchPreview = function() {
@@ -52,7 +59,7 @@ angular.module('githubClassroomDashboardApp')
         response.data.filter(function(repo){
           return !(repo.name.indexOf('cfrancillon') !== -1 || repo.name.indexOf('bfritscher') !== -1);
         }).forEach(function(repo){
-          if(repo.name.indexOf(classroomProjectPrefix) === 0){
+          if(repo.name.indexOf(main.classroomProjectPrefix) === 0){
             var r = {name: repo.name};
             if(main.assignments.hasOwnProperty(repo.name)){
               r = main.assignments[repo.name];
