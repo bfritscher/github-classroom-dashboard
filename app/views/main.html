@@ -4,6 +4,8 @@
 <button ng-click="main.refresh()">refresh data</button>
 <label><input type="checkbox" ng-model="debug"> debug</label>
 <label><input type="checkbox" ng-model="showpic"> showpic</label>
+<label><input placeholder="prefix" type="text" ng-change="main.saveProjectPrefix()" ng-model="main.classroomProjectPrefix"></label>
+<button ng-click="main.clearAssignments()">clear</button>
 <h2>Checks</h2>
 <table>
 	<thead>
@@ -90,14 +92,9 @@
 			<span ng-click="a.before = !a.before">{{ a.before ? 'HTML': 'BOOTSTRAP' }}</span>
 		</div>
 		<div ng-if="!a.before">
-			<img ng-src="preview/heg-web.github.io!{{a.name}}-320x480.png"/>
-			<img ng-src="preview/heg-web.github.io!{{a.name}}-1024x768.png"/>
-			<img ng-src="preview/heg-web.github.io!{{a.name}}-1600x1200.png"/>
-		</div>
-		<div ng-if="a.before">
-			<img ng-src="preview/amc.ig.he-arc.ch!pweb!2016tpart_before!{{a.name.substr(6)}}-320x480.png"/>
-			<img ng-src="preview/amc.ig.he-arc.ch!pweb!2016tpart_before!{{a.name.substr(6)}}-1024x768.png"/>
-			<img ng-src="preview/amc.ig.he-arc.ch!pweb!2016tpart_before!{{a.name.substr(6)}}-1600x1200.png"/>
+			<img ng-src="preview/heg-web.github.io!{{a.name}}-phone.png"/>
+			<img ng-src="preview/heg-web.github.io!{{a.name}}-tablet.png"/>
+			<img ng-src="preview/heg-web.github.io!{{a.name}}-desktop.png"/>
 		</div>
 	</div>
 </div>

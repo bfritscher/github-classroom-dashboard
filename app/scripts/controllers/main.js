@@ -1,5 +1,12 @@
 'use strict';
 
+function b64DecodeUnicode(str) {
+  // Going backwards: from bytestream, to percent-encoding, to original string.
+  return decodeURIComponent(atob(str).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+
 /**
  * @ngdoc function
  * @name githubClassroomDashboardApp.controller:MainCtrl
@@ -19,9 +26,16 @@ angular.module('githubClassroomDashboardApp')
       });
 
     var org = 'heg-web';
-    var classroomProjectPrefix = 'projet-';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
+    main.classroomProjectPrefix = localStorage.getItem('classroomProjectPrefix');
+    main.saveProjectPrefix = function() {
+      console.log( main.classroomProjectPrefix)
+      localStorage.setItem('classroomProjectPrefix', main.classroomProjectPrefix);
+    };
+    main.clearAssignments = function() {
+      main.assignments = {};
+    };
 
     main.before = false;
     main.switchPreview = function() {
@@ -45,7 +59,7 @@ angular.module('githubClassroomDashboardApp')
         response.data.filter(function(repo){
           return !(repo.name.indexOf('cfrancillon') !== -1 || repo.name.indexOf('bfritscher') !== -1);
         }).forEach(function(repo){
-          if(repo.name.indexOf(classroomProjectPrefix) === 0){
+          if(repo.name.indexOf(main.classroomProjectPrefix) === 0){
             var r = {name: repo.name};
             if(main.assignments.hasOwnProperty(repo.name)){
               r = main.assignments[repo.name];
@@ -148,12 +162,12 @@ angular.module('githubClassroomDashboardApp')
           });
     }
 
-    var regexTitle = /title>(.*?)<\/title/g;
     function checkTitle(r){
       r.title = false;
       return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/index.html?ref=gh-pages')
-          .then( function(response){
-            var match = regexTitle.exec(atob(response.data.content));
+          .then(function(response){
+            var regexTitle = /title>(.*?)<\/title/gm;
+            var match = regexTitle.exec(b64DecodeUnicode(response.data.content));
             if(match) {
               r.title = match[1];
             }
