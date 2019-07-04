@@ -1,3 +1,4 @@
+cd preview
 ECHO on
 for /F "tokens=*" %%A in (urls.txt) do call :CAPTURE %%A
 goto END
