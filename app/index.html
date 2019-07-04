@@ -49,10 +49,13 @@
     <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
     <!-- endbower -->
+    <script src="node_modules/papaparse/papaparse.js"></script>
+    <script src="node_modules/marked/marked.min.js"></script>
     <!-- endbuild -->
 
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
         <script src="scripts/app.js"></script>
+        <script src="scripts/directives/customOnChange.js"></script>
         <script src="scripts/controllers/main.js"></script>
         <script src="scripts/services/apiinterceptor.js"></script>
         <script src="scripts/services/ghapi.js"></script>

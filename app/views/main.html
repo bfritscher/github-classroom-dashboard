@@ -5,7 +5,17 @@
 <label><input type="checkbox" ng-model="debug"> debug</label>
 <label><input type="checkbox" ng-model="showpic"> showpic</label>
 <label><input placeholder="prefix" type="text" ng-change="main.saveProjectPrefix()" ng-model="main.classroomProjectPrefix"></label>
-<button ng-click="main.clearAssignments()">clear</button>
+<button ng-click="main.clear()">clear</button>
+<input type="file" custom-on-change="main.handleFileSelect" />
+<div ng-if="main.evals.length > 0 || main.evalsDone.length > 0">
+	<h2>Evaluations {{main.evals.length}}</h2>
+	<div class="eval" ng-repeat="eval in main.evals" ng-bind-html="eval.preview"></div>
+	<button ng-click="main.createIssue()">Create Issues on GitHUB</button>
+	<p>Done: {{main.evalsDone.length}}</p>
+	<ul>
+		<li ng-repeat="done in main.evalsDone"><a ng-href="{{done.html_url}}">{{done.repo}}</a></li>
+	</ul>
+</div>
 <h2>Checks</h2>
 <table>
 	<thead>

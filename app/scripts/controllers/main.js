@@ -18,6 +18,8 @@ angular.module('githubClassroomDashboardApp')
   .controller('MainCtrl', function ($http, ghApi, $scope) {
     var main = this;
     main.ghApi = ghApi;
+    main.evals = [];
+    main.evalsDone = [];
 
     var lookup = {};
     $http.get('/preview/lookup.json')
@@ -30,11 +32,12 @@ angular.module('githubClassroomDashboardApp')
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
     main.classroomProjectPrefix = localStorage.getItem('classroomProjectPrefix');
     main.saveProjectPrefix = function() {
-      console.log( main.classroomProjectPrefix)
       localStorage.setItem('classroomProjectPrefix', main.classroomProjectPrefix);
     };
-    main.clearAssignments = function() {
+    main.clear = function() {
       main.assignments = {};
+      main.evals = [];
+      main.evalsDone = [];
     };
 
     main.before = false;
@@ -244,5 +247,71 @@ angular.module('githubClassroomDashboardApp')
             u.name = response.data.name;
           });
     }
+
+    function createIssue() {
+      ghApi.access_token = localStorage.getItem('access_token');
+      const evaluation = main.evals.pop();
+      if (evaluation) {
+        const issue = {
+          "title": `Evaluation ${evaluation.repo}`,
+          "body": evaluation.md
+        };
+        $http.post(API + 'repos/' + org + '/' + evaluation.repo + '/issues', issue).then(function(response) {
+          main.evalsDone.push({
+            repo: evaluation.repo,
+            html_url: response.data.html_url
+          })
+          console.log(response.data);
+        }).catch((e) => {
+          console.log(e);
+        })
+        setTimeout(createIssue, 1000);
+      }
+    }
+
+    function toMD(fields, data) {
+      return fields.reduce((md, field) => {
+        if (!isNaN(data[field]) && isNaN(field)) {
+          if (field.startsWith('Note')) {
+            md += `|**${field}** | **${data[field]}**|\n`;
+          } else {
+            md += `|${field} | ${data[field]}|\n`;
+          }
+        }
+        if (field === 'Commentaires') {
+          md += `\n\n### ${field}\n${data[field]}\n`;
+        }
+        return md;
+      }, `## Evaluation ${data.repo}\n\n| Critères | Points |\n|---|---:|\n`);
+    }
+
+    function parseCSV(file) {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          const fields = results.meta.fields.filter(f => f && !f.startsWith('_'));
+          const evals = [];
+          results.data.forEach(row => {
+            const md = toMD(fields, row);
+            evals.push({
+              repo: row.repo,
+              md: md,
+              preview: marked(md)
+            });
+          });
+          $scope.$apply(() => {
+            main.evals = evals;
+          });
+        }
+      });
+    }
+
+    main.handleFileSelect = function (event) {
+      var file = event.target.files[0];
+      parseCSV(file);
+    };
+
+    main.createIssue = createIssue;
 
   });

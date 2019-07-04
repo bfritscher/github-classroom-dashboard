@@ -38,6 +38,8 @@
     "serve": "grunt serve"
   },
   "dependencies": {
-    "node-unzip-2": "^0.2.7"
+    "marked": "^0.6.3",
+    "node-unzip-2": "^0.2.7",
+    "papaparse": "^5.0.0"
   }
 }
