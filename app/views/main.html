@@ -34,6 +34,7 @@
 			<th ng-if="debug">commits</th>
 			<th ng-if="debug">branches</th>
 			<th ng-if="debug">tags</th>
+			<th ng-if="debug">style</th>
 			<th>bootstrap</th>
 			<th>structure/code</th>
 			<th>1 jquery plugin</th>
@@ -78,6 +79,7 @@
 			<td ng-if="debug" ng-click="main.commiterIndex=[];main.commits=a.commits">{{a.commits.length}}</td>
 			<td ng-if="debug">{{a.branches}}</td>
 			<td ng-if="debug">{{a.releases}}</td>
+			<td ng-if="debug">{{a.style}}</td>
 			<td></td>
 			<td></td>
 			<td></td>

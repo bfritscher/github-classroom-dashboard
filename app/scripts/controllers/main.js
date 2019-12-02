@@ -170,9 +170,17 @@ angular.module('githubClassroomDashboardApp')
       return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/index.html?ref=gh-pages')
           .then(function(response){
             var regexTitle = /title>(.*?)<\/title/gm;
-            var match = regexTitle.exec(b64DecodeUnicode(response.data.content));
+            var regexStyle = /style="[^w](.*?)"/gm;
+            var html = b64DecodeUnicode(response.data.content);
+            var match = regexTitle.exec(html);
             if(match) {
               r.title = match[1];
+            }
+            match = regexStyle.exec(html);
+            if(match) {
+              r.style = match[1];
+            } else {
+              r.style = '';
             }
           }, function(){
             return;
@@ -260,11 +268,11 @@ angular.module('githubClassroomDashboardApp')
           main.evalsDone.push({
             repo: evaluation.repo,
             html_url: response.data.html_url
-          })
+          });
           console.log(response.data);
         }).catch((e) => {
           console.log(e);
-        })
+        });
         setTimeout(createIssue, 1000);
       }
     }
