@@ -2,8 +2,8 @@
 
 function b64DecodeUnicode(str) {
   // Going backwards: from bytestream, to percent-encoding, to original string.
-  return decodeURIComponent(atob(str).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  return decodeURIComponent(atob(str).split('').map(function (c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
   }).join(''));
 }
 
@@ -21,239 +21,248 @@ angular.module('githubClassroomDashboardApp')
     main.evals = [];
     main.evalsDone = [];
 
-    var lookup = {};
-    $http.get('/preview/lookup.json')
-      .then( function(response){
-        lookup = response.data;
-      });
+    main.lookup = {};
+
+    Papa.parse('/preview/classroom_roster.csv', {
+      download: true,
+      header: true,
+      complete: (results) => {
+        $scope.$apply(() => {
+          results.data.forEach(e => {
+            main.lookup[e.github_username] = e.identifier;
+          })
+        });
+      }
+    })
+
 
     var org = 'heg-web';
     var API = 'https://api.github.com/';
     main.assignments = JSON.parse(localStorage.getItem('assignments') || '{}');
     main.classroomProjectPrefix = localStorage.getItem('classroomProjectPrefix');
-    main.saveProjectPrefix = function() {
+    main.saveProjectPrefix = function () {
       localStorage.setItem('classroomProjectPrefix', main.classroomProjectPrefix);
     };
-    main.clear = function() {
+    main.clear = function () {
       main.assignments = {};
       main.evals = [];
       main.evalsDone = [];
     };
 
     main.before = false;
-    main.switchPreview = function() {
+    main.switchPreview = function () {
       main.before = !main.before;
-      Object.keys(main.assignments).forEach(function(k){
+      Object.keys(main.assignments).forEach(function (k) {
         var a = main.assignments[k];
         a.before = main.before;
       });
     };
 
-    $scope.noBot = function(user) {
+    $scope.noBot = function (user) {
       return !user.login.includes('heg-web-bot');
     };
 
-    main.refresh = function(){
+    main.refresh = function () {
       ghApi.access_token = localStorage.getItem('access_token') || window.prompt('access_token');
-      localStorage.setItem('access_token', ghApi.access_token );
+      localStorage.setItem('access_token', ghApi.access_token);
       $http.get(API + 'orgs/' + org + '/repos?per_page=100') //page=2&
-      .then( function(response){
-        //TODO: handle multipage
-        response.data.filter(function(repo){
-          return !(repo.name.indexOf('cfrancillon') !== -1 || repo.name.indexOf('bfritscher') !== -1);
-        }).forEach(function(repo){
-          if(repo.name.indexOf(main.classroomProjectPrefix) === 0){
-            var r = {name: repo.name};
-            if(main.assignments.hasOwnProperty(repo.name)){
-              r = main.assignments[repo.name];
-            } else {
-              main.assignments[repo.name] = r;
-            }
+        .then(function (response) {
+          //TODO: handle multipage
+          response.data.filter(function (repo) {
+            return !(repo.name.indexOf('cfrancillon') !== -1 || repo.name.indexOf('bfritscher') !== -1);
+          }).forEach(function (repo) {
+            if (repo.name.indexOf(main.classroomProjectPrefix) === 0) {
+              var r = { name: repo.name };
+              if (main.assignments.hasOwnProperty(repo.name)) {
+                r = main.assignments[repo.name];
+              } else {
+                main.assignments[repo.name] = r;
+              }
 
-            getCollaborators(r).then(function(){
-              return checkBranches(r);
-            }).then(function(){
-              return checkGhPagesVendor(r);
-            }).then(function(){
-              return checkMasterSrc(r);
-            }).then(function(){
-              return checkReleases(r);
-            }).then(function(){
-              return checkReadme(r);
-            }).then(function(){
-              return getCommits(r);
-            }).then(function(){
-              return checkTitle(r);
-            }).then(function(){
-              localStorage.setItem('assignments', JSON.stringify(main.assignments));
-            });
-          }
+              getCollaborators(r).then(function () {
+                return checkBranches(r);
+              }).then(function () {
+                return checkGhPagesVendor(r);
+              }).then(function () {
+                return checkMasterSrc(r);
+              }).then(function () {
+                return checkReleases(r);
+              }).then(function () {
+                return checkReadme(r);
+              }).then(function () {
+                return getCommits(r);
+              }).then(function () {
+                return checkTitle(r);
+              }).then(function () {
+                localStorage.setItem('assignments', JSON.stringify(main.assignments));
+              });
+            }
+          });
         });
-      });
     };
 
-    main.getUrls = function() {
-      return 'data:text/plain;charset=utf-8,' + encodeURIComponent(Object.keys(main.assignments).reduce(function(list, key){
+    main.getUrls = function () {
+      return 'data:text/plain;charset=utf-8,' + encodeURIComponent(Object.keys(main.assignments).reduce(function (list, key) {
         return list + 'https://heg-web.github.io/' + main.assignments[key].name + '\n';
       }, ''));
     };
 
-    main.loginToMatricule = function(login) {
-      return lookup[login];
+    main.loginToMatricule = function (login) {
+      return main.lookup[login];
     };
 
-    main.commitCount = function(commits, u) {
-        if (commits) {
-            return commits.filter(function(c){
-                return (c.commit.author.name === u.login|| c.commit.author.name === u.name) && c.commit.message.indexOf('Merge') !== 0;
-            }).length;
-        }
-        return 0;
+    main.commitCount = function (commits, u) {
+      if (commits) {
+        return commits.filter(function (c) {
+          return (c.commit.author.name === u.login || c.commit.author.name === u.name) && c.commit.message.indexOf('Merge') !== 0;
+        }).length;
+      }
+      return 0;
     };
 
-    main.getCommiterIndex = function(name) {
-        if (main.commiterIndex.indexOf(name) === -1) {
-            main.commiterIndex.push(name);
-        }
-        return main.commiterIndex.indexOf(name);
+    main.getCommiterIndex = function (name) {
+      if (main.commiterIndex.indexOf(name) === -1) {
+        main.commiterIndex.push(name);
+      }
+      return main.commiterIndex.indexOf(name);
     };
 
-    function checkBranches(r){
+    function checkBranches(r) {
       r.hasMaster = false;
       r.hasGhPages = false;
       return $http.get(API + 'repos/' + org + '/' + r.name + '/branches')
-          .then( function(response){
-            r.branches = response.data.map( function( branch ) {
-              if(branch.name === 'gh-pages'){
-                r.hasGhPages = true;
-              }
-              if(branch.name === 'master'){
-                r.hasMaster = true;
-              }
-              return branch.name;
-            });
+        .then(function (response) {
+          r.branches = response.data.map(function (branch) {
+            if (branch.name === 'gh-pages') {
+              r.hasGhPages = true;
+            }
+            if (branch.name === 'master') {
+              r.hasMaster = true;
+            }
+            return branch.name;
           });
+        });
     }
 
-    function checkGhPagesVendor(r){
+    function checkGhPagesVendor(r) {
       r.hasVendor = false;
       return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/js?ref=gh-pages')
-          .then( function(response){
-            for(var i=0; i < response.data.length; i++){
-              if(response.data[i].name.indexOf('app') === 0){
-                r.hasVendor = true;
-                return;
-              }
+        .then(function (response) {
+          for (var i = 0; i < response.data.length; i++) {
+            if (response.data[i].name.indexOf('app') === 0) {
+              r.hasVendor = true;
+              return;
             }
-          }, function(){
-            return;
-          });
+          }
+        }, function () {
+          return;
+        });
     }
 
-    function checkMasterSrc(r){
+    function checkMasterSrc(r) {
       r.isMasterSrc = false;
       return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?ref=master')
-          .then( function(response){
-            for(var i=0; i < response.data.length; i++){
-              if(response.data[i].name.indexOf('package.json') === 0){
-                r.isMasterSrc = true;
-                return;
-              }
+        .then(function (response) {
+          for (var i = 0; i < response.data.length; i++) {
+            if (response.data[i].name.indexOf('package.json') === 0) {
+              r.isMasterSrc = true;
+              return;
             }
-          }, function(){
-            return;
-          });
+          }
+        }, function () {
+          return;
+        });
     }
 
-    function checkTitle(r){
+    function checkTitle(r) {
       r.title = false;
       return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/index.html?ref=gh-pages')
-          .then(function(response){
-            var regexTitle = /title>(.*?)<\/title/gm;
-            var regexStyle = /style="[^w](.*?)"/gm;
-            var html = b64DecodeUnicode(response.data.content);
-            var match = regexTitle.exec(html);
-            if(match) {
-              r.title = match[1];
-            }
-            match = regexStyle.exec(html);
-            if(match) {
-              r.style = match[1];
-            } else {
-              r.style = '';
-            }
-          }, function(){
-            return;
-          });
+        .then(function (response) {
+          var regexTitle = /title>(.*?)<\/title/gm;
+          var regexStyle = /style="[^w](.*?)"/gm;
+          var html = b64DecodeUnicode(response.data.content);
+          var match = regexTitle.exec(html);
+          if (match) {
+            r.title = match[1];
+          }
+          match = regexStyle.exec(html);
+          if (match) {
+            r.style = match[1];
+          } else {
+            r.style = '';
+          }
+        }, function () {
+          return;
+        });
     }
 
-    function checkReleases(r){
+    function checkReleases(r) {
       r.hasRelease = false;
       r.releaseSha = '';
       return $http.get(API + 'repos/' + org + '/' + r.name + '/tags')
-          .then( function(response){
-            r.releases = response.data.map( function( release ) {
-              if(release.name === '2.0.0'){
-                r.hasRelease = true;
-                r.releaseSha = release.commit.sha;
-              }
+        .then(function (response) {
+          r.releases = response.data.map(function (release) {
+            if (release.name === '2.0.0') {
+              r.hasRelease = true;
+              r.releaseSha = release.commit.sha;
+            }
 
-              return release.name;
-            });
+            return release.name;
           });
+        });
     }
 
-    function checkReadme(r){
+    function checkReadme(r) {
       r.hasReadme = false;
       return $http.get(API + 'repos/' + org + '/' + r.name + '/readme')
-          .then( function(response){
-            r.hasReadme = response.data.name.indexOf('.md') > -1;
-            r.readmeUrl = response.data.html_url;
-          }, function(){
-            return;
-          });
+        .then(function (response) {
+          r.hasReadme = response.data.name.indexOf('.md') > -1;
+          r.readmeUrl = response.data.html_url;
+        }, function () {
+          return;
+        });
     }
 
-    function getCollaborators(r){
+    function getCollaborators(r) {
       return $http.get(API + 'repos/' + org + '/' + r.name + '/collaborators')
-          .then( function(response){
-              r.users = response.data.filter(function(c){
-                return c.login !== 'bfritscher';
-              }).map(function(c){
-                var u = {login: c.login};
-                getUser(u);
-                return u;
-              });
+        .then(function (response) {
+          r.users = response.data.filter(function (c) {
+            return c.login !== 'bfritscher';
+          }).map(function (c) {
+            var u = { login: c.login };
+            getUser(u);
+            return u;
           });
+        });
     }
 
-    function getCommitsPage(r, page){
-        return $http.get(API + 'repos/' + org + '/' + r.name + '/commits?per_page=100&page=' + page)
-          .then( function(response){
-                r.commits = r.commits.concat(response.data);
-                if(response.headers('link')){
-                   console.log(response.headers('link'));
-                   var match = response.headers('link').match(/page=(\d+)>; rel="(.*?)"/);
-                   if (match[2] === 'next') {
-                       getCommitsPage(r, match[1]);
-                   }
-                }
-          }, function(){
-            return;
-          });
+    function getCommitsPage(r, page) {
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/commits?per_page=100&page=' + page)
+        .then(function (response) {
+          r.commits = r.commits.concat(response.data);
+          if (response.headers('link')) {
+            console.log(response.headers('link'));
+            var match = response.headers('link').match(/page=(\d+)>; rel="(.*?)"/);
+            if (match[2] === 'next') {
+              getCommitsPage(r, match[1]);
+            }
+          }
+        }, function () {
+          return;
+        });
     }
 
-    function getCommits(r){
-        r.commits = [];
-        return getCommitsPage(r, 1);
+    function getCommits(r) {
+      r.commits = [];
+      return getCommitsPage(r, 1);
     }
 
-    function getUser(u){
+    function getUser(u) {
       //TODO lookup cache;
       return $http.get(API + 'users/' + u.login)
-          .then( function(response){
-            u.name = response.data.name;
-          });
+        .then(function (response) {
+          u.name = response.data.name;
+        });
     }
 
     function createIssue() {
@@ -264,7 +273,7 @@ angular.module('githubClassroomDashboardApp')
           "title": `Evaluation ${evaluation.repo}`,
           "body": evaluation.md
         };
-        $http.post(API + 'repos/' + org + '/' + evaluation.repo + '/issues', issue).then(function(response) {
+        $http.post(API + 'repos/' + org + '/' + evaluation.repo + '/issues', issue).then(function (response) {
           main.evalsDone.push({
             repo: evaluation.repo,
             html_url: response.data.html_url
@@ -297,7 +306,7 @@ angular.module('githubClassroomDashboardApp')
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
-        complete: function(results) {
+        complete: function (results) {
           const fields = results.meta.fields.filter(f => f && !f.startsWith('_'));
           const evals = [];
           results.data.forEach(row => {

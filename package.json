@@ -40,6 +40,6 @@
   "dependencies": {
     "marked": "^0.7.0",
     "node-unzip-2": "^0.2.8",
-    "papaparse": "^5.1.0"
+    "papaparse": "^5.2.0"
   }
 }
