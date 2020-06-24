@@ -78,28 +78,36 @@ angular.module('githubClassroomDashboardApp')
               } else {
                 main.assignments[repo.name] = r;
               }
-
-              getCollaborators(r).then(function () {
-                return checkBranches(r);
-              }).then(function () {
-                return checkGhPagesVendor(r);
-              }).then(function () {
-                return checkMasterSrc(r);
-              }).then(function () {
-                return checkReleases(r);
-              }).then(function () {
-                return checkReadme(r);
-              }).then(function () {
-                return getCommits(r);
-              }).then(function () {
-                return checkTitle(r);
-              }).then(function () {
-                localStorage.setItem('assignments', JSON.stringify(main.assignments));
-              });
+              main.refreshAssignment(r)
             }
           });
         });
     };
+
+    main.refreshAssignment = (r) => {
+      ghApi.access_token = localStorage.getItem('access_token');
+      getCollaborators(r)
+      .then(function () {
+        return checkBranches(r);
+      }).then(function () {
+        return checkGhPagesVendor(r);
+      }).then(function () {
+        return checkMasterSrc(r);
+      }).then(function () {
+        return checkReleases(r);
+      }).then(function () {
+        return checkReadme(r);
+      }).then(function () {
+        return getCommits(r);
+      }).then(function () {
+        return checkTitle(r);
+      }).then(function () {
+        return checkGHPagesStatus(r);
+      })
+      .then(function () {
+        localStorage.setItem('assignments', JSON.stringify(main.assignments));
+      });
+    }
 
     main.getUrls = function () {
       return 'data:text/plain;charset=utf-8,' + encodeURIComponent(Object.keys(main.assignments).reduce(function (list, key) {
@@ -211,6 +219,39 @@ angular.module('githubClassroomDashboardApp')
           });
         });
     }
+
+    function checkGHPagesStatus(r) {
+      ghApi.access_token = localStorage.getItem('access_token');
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/pages')
+        .then(function (response) {
+          console.log(response);
+          r.ghPagesStatus = response.data.status;
+        });
+    }
+
+    function enableGHPages(r) {
+      ghApi.access_token = localStorage.getItem('access_token');
+      const req = {
+        method: 'POST',
+        url: API + 'repos/' + org + '/' + r.name + '/pages',
+        headers: {
+          'Accept': 'application/vnd.github.switcheroo-preview+json'
+        },
+        data: {
+          source: {
+            branch: "gh-pages"
+          }
+        }
+      }
+      $http(req)
+      .then(function (response) {
+        console.log(response.data);
+        setTimeout(() => {
+          checkGHPagesStatus(r)
+        }, 1000)
+      });
+    }
+    main.enableGHPages = enableGHPages;
 
     function checkReadme(r) {
       r.hasReadme = false;

@@ -4,7 +4,7 @@
 <button ng-click="main.refresh()">refresh data</button>
 <label><input type="checkbox" ng-model="debug"> debug</label>
 <label><input type="checkbox" ng-model="showpic"> showpic</label>
-<label><input placeholder="prefix" type="text" ng-change="main.saveProjectPrefix()" ng-model="main.classroomProjectPrefix"></label>
+<label>Feedback: <input placeholder="prefix" type="text" ng-change="main.saveProjectPrefix()" ng-model="main.classroomProjectPrefix"></label>
 <button ng-click="main.clear()">clear</button>
 <input type="file" custom-on-change="main.handleFileSelect" />
 <div ng-if="main.evals.length > 0 || main.evalsDone.length > 0">
@@ -27,6 +27,7 @@
 			<th>master</th>
 			<th>masterIsSrc</th>
 			<th>gh-pages</th>
+			<th ng-if="debug">status</th>
 			<th>webIsDist</th>
 			<th>readme</th>
 			<th>2.0.0</th>
@@ -43,7 +44,7 @@
 	</thead>
 	<tbody>
 		<tr ng-repeat="(name, a) in main.assignments">
-			<td>{{$index + 1}}</td>
+			<td ng-click="main.refreshAssignment(a)">{{$index + 1}}</td>
             <td>{{name}}</td>
 			<td ng-if="debug">
 				<div class="student" ng-repeat="u in a.users">{{main.loginToMatricule(u.login)}}</div>
@@ -63,6 +64,10 @@
 			<td ng-class="{correct: a.hasGhPages, wrong: !a.hasGhPages}">
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/gh-pages">{{a.hasGhPages}}</a>
 			</td>
+			<td ng-if="debug" ng-class="{correct: a.ghPagesStatus=='built', wrong: !a.ghPagesStatus || a.ghPagesStatus != 'built'}">
+				<button ng-if="!a.ghPagesStatus && a.hasGhPages" ng-click="main.enableGHPages(a)">enable</button>{{a.ghPagesStatus}}
+			</td>
+
 			<td ng-class="{correct: a.hasVendor, wrong: !a.hasVendor}">
 				<a target="_blank" ng-href="https://heg-web.github.io/{{a.name}}">{{a.hasVendor}}</a>
 			</td>
