@@ -35,4 +35,9 @@ angular
     {
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|data):/);
     }
-]);
+])
+.filter('ghPages', function ($sce) {
+  return function(repo) {
+    return $sce.trustAsResourceUrl('https://heg-web.github.io/' + repo);
+  };
+});

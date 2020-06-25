@@ -29,10 +29,11 @@ tbody td {
 
 }
 .preview{
-	width: 600px;
-	max-height: 400px;
+	width: 700px;
+	height: 400px;
 	overflow: hidden;
 }
+
 
 .preview a {
 	font-size: 12pt;
@@ -45,17 +46,28 @@ tbody td {
 	vertical-align: top;
 }
 
-.preview img:nth-child(1) {
+.preview img:nth-child(1),
+.preview .preview-iframes > div:nth-child(1) {
 	width: 20%;
 }
 
-.preview img:nth-child(2) {
-	width: 33%;
+.preview img:nth-child(2),
+.preview .preview-iframes > div:nth-child(2) {
+	width: 32%;
 }
 
-.preview img:nth-child(3) {
-	width: 45%;
+.preview img:nth-child(3),
+.preview .preview-iframes > div:nth-child(3) {
+	width: 46%;
 }
+
+.preview-iframes > div {
+    position: relative;
+    height: 400px;
+	overflow: auto;
+	float: left;
+}
+
 
 .student img{
 	width: 80px;

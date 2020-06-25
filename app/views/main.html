@@ -113,5 +113,16 @@
 			<img ng-src="preview/heg-web.github.io!{{a.name}}-tablet.png"/>
 			<img ng-src="preview/heg-web.github.io!{{a.name}}-desktop.png"/>
 		</div>
+		<div ng-if="a.before" class="preview-iframes">
+			<div>
+				<iframe style="position:absolute; width: 640px; height: 3000px; transform: scale3d(0.2, 0.2, 1) translate3d(-1300px, -6000px, 0)" ng-src="{{a.name | ghPages}}"></iframe>
+			</div>
+			<div>
+				<iframe style="position:absolute; width: 1024px; height: 3000px; transform: scale3d(0.2, 0.2, 1) translate3d(-2040px, -6000px, 0)" ng-src="{{a.name | ghPages}}"></iframe>
+			</div>
+			<div>
+				<iframe style="position:absolute; width: 1600px; height: 3000px; transform: scale3d(0.2, 0.2, 1) translate3d(-3200px, -6000px, 0)" ng-src="{{a.name | ghPages}}"></iframe>
+			</div>
+		</div>
 	</div>
 </div>
