@@ -105,6 +105,9 @@ angular.module('githubClassroomDashboardApp')
         return checkGHPagesStatus(r);
       })
       .then(function () {
+        return searchString(r, "console.log", "console");
+      })
+      .then(function () {
         localStorage.setItem('assignments', JSON.stringify(main.assignments));
       });
     }
@@ -114,6 +117,17 @@ angular.module('githubClassroomDashboardApp')
         return list + 'https://heg-web.github.io/' + main.assignments[key].name + '\n';
       }, ''));
     };
+
+    function searchString(r, str, key) {
+      ghApi.access_token = localStorage.getItem('access_token');
+      return $http.get(API + `search/code?q=${str}+in:file+language:js+repo:${org}/${r.name}`)
+        .then(function (response) {
+          if(!r.hasOwnProperty("search")) {
+            r.search = {}
+          }
+          r.search[key] = response.data;
+        });
+    }
 
     main.loginToMatricule = function (login) {
       return main.lookup[login];

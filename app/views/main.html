@@ -40,6 +40,7 @@
 			<th>structure/code</th>
 			<th>1 jquery plugin</th>
 			<th>Text readme</th>
+			<th ng-if="debug">console.log</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -89,6 +90,9 @@
 			<td></td>
 			<td></td>
 			<td></td>
+			<td ng-if="debug"><span ng-if="a.search">{{a.search.console.total_count}}
+				<a ng-repeat="e in a.search.console.items" ng-href="{{e.html_url}}">{{e.path}}</a>
+			</span></td>
 		</tr>
 	</tbody>
 </table>
