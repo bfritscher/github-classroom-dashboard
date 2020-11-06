@@ -108,6 +108,9 @@ angular.module('githubClassroomDashboardApp')
         return searchString(r, "console.log", "console");
       })
       .then(function () {
+        return searchString(r, "localStorage", "localStorage");
+      })
+      .then(function () {
         localStorage.setItem('assignments', JSON.stringify(main.assignments));
       });
     }
@@ -120,7 +123,7 @@ angular.module('githubClassroomDashboardApp')
 
     function searchString(r, str, key) {
       ghApi.access_token = localStorage.getItem('access_token');
-      return $http.get(API + `search/code?q=${str}+in:file+language:js+repo:${org}/${r.name}`)
+      return $http.get(API + `search/code?q=${str}+in:file+extension:js+extension:vue+repo:${org}/${r.name}`)
         .then(function (response) {
           if(!r.hasOwnProperty("search")) {
             r.search = {}
@@ -151,12 +154,16 @@ angular.module('githubClassroomDashboardApp')
 
     function checkBranches(r) {
       r.hasMaster = false;
+      r.hasMain = false;
       r.hasGhPages = false;
       return $http.get(API + 'repos/' + org + '/' + r.name + '/branches')
         .then(function (response) {
           r.branches = response.data.map(function (branch) {
             if (branch.name === 'gh-pages') {
               r.hasGhPages = true;
+            }
+            if (branch.name === 'main') {
+              r.hasMain = true;
             }
             if (branch.name === 'master') {
               r.hasMaster = true;
@@ -183,7 +190,7 @@ angular.module('githubClassroomDashboardApp')
 
     function checkMasterSrc(r) {
       r.isMasterSrc = false;
-      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?ref=master')
+      return $http.get(API + 'repos/' + org + '/' + r.name + '/contents/?ref=' + (r.hasMain ? 'main' : 'master'))
         .then(function (response) {
           for (var i = 0; i < response.data.length; i++) {
             if (response.data[i].name.indexOf('package.json') === 0) {

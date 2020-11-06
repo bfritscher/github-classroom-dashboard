@@ -41,6 +41,7 @@
 			<th>1 jquery plugin</th>
 			<th>Text readme</th>
 			<th ng-if="debug">console.log</th>
+			<th ng-if="debug">localStorage</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -56,8 +57,8 @@
 			</span>
 			</td>
 
-			<td ng-class="{correct: a.hasMaster, wrong: !a.hasMaster}">
-				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/master">{{a.hasMaster}}</a>
+			<td ng-class="{correct: a.hasMaster || a.hasMain, wrong: !(a.hasMaster || a.hasMain)}">
+				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/master">{{a.hasMaster || a.hasMain}}</a>
 				</td>
 			<td ng-class="{correct: a.isMasterSrc, wrong: !a.isMasterSrc}">
 				<a target="_blank" ng-href="https://github.com/heg-web/{{a.name}}/tree/master">{{a.isMasterSrc}}</a>
@@ -90,9 +91,16 @@
 			<td></td>
 			<td></td>
 			<td></td>
-			<td ng-if="debug"><span ng-if="a.search">{{a.search.console.total_count}}
-				<a ng-repeat="e in a.search.console.items" ng-href="{{e.html_url}}">{{e.path}}</a>
-			</span></td>
+			<td ng-if="debug"><div ng-if="a.search">{{a.search.console.total_count}}
+				<ul>
+					<li ng-repeat="e in a.search.console.items"><a ng-href="{{e.html_url}}">{{e.path}}</a></li>
+				</ul>
+			</div></td>
+			<td ng-if="debug"><div ng-if="a.search">{{a.search.localStorage.total_count}}
+				<ul>
+					<li ng-repeat="e in a.search.localStorage.items"><a ng-href="{{e.html_url}}">{{e.path}}</a></li>
+				</ul>
+			</div></td>
 		</tr>
 	</tbody>
 </table>
