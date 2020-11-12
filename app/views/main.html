@@ -114,11 +114,14 @@
 <a ng-href="{{main.getUrls()}}" download="urls.txt">download urls.txt</a>
 
 <h2>Preview <span ng-click="main.switchPreview()">{{ main.before ? 'HTML': 'BOOTSTRAP' }}</span></h2>
-<div id="preview">
-	<div class="preview" ng-repeat="a in main.assignments">
+<input type="checkbox" ng-model="displayMobilePreview"> Mobile
+<div id="preview" ng-class="{noMobile: !displayMobilePreview}">
+	<div class="preview" ng-class="{'preview-zoom': main.zoom == a}" ng-repeat="a in main.assignments">
 		<div>
 			<a target="_blank" ng-href="https://heg-web.github.io/{{a.name}}">{{a.name}} <span ng-class="{correct: a.hasVendor, wrong: !a.hasVendor}">{{a.hasVendor}}</span></a>
 			<span ng-click="a.before = !a.before">{{ a.before ? 'HTML': 'BOOTSTRAP' }}</span>
+			<span class="zoom-toggle" ng-if="main.zoom != a" ng-click="main.zoom = a">show</span>
+			<span class="zoom-toggle" ng-if="main.zoom == a" ng-click="main.zoom = null">close</span>
 		</div>
 		<div ng-if="!a.before">
 			<img ng-src="preview/heg-web.github.io!{{a.name}}-phone.png"/>
@@ -126,14 +129,17 @@
 			<img ng-src="preview/heg-web.github.io!{{a.name}}-desktop.png"/>
 		</div>
 		<div ng-if="a.before" class="preview-iframes">
-			<div>
+			<div ng-if="displayMobilePreview">
 				<iframe style="position:absolute; width: 640px; height: 3000px; transform: scale3d(0.2, 0.2, 1) translate3d(-1300px, -6000px, 0)" ng-src="{{a.name | ghPages}}"></iframe>
 			</div>
-			<div>
+			<div ng-if="displayMobilePreview">
 				<iframe style="position:absolute; width: 1024px; height: 3000px; transform: scale3d(0.2, 0.2, 1) translate3d(-2040px, -6000px, 0)" ng-src="{{a.name | ghPages}}"></iframe>
 			</div>
-			<div>
+			<div ng-if="displayMobilePreview">
 				<iframe style="position:absolute; width: 1600px; height: 3000px; transform: scale3d(0.2, 0.2, 1) translate3d(-3200px, -6000px, 0)" ng-src="{{a.name | ghPages}}"></iframe>
+			</div>
+			<div ng-if="!displayMobilePreview">
+				<iframe style="position:absolute; width: 1600px; height: 3000px; transform: scale3d(0.3, 0.3, 1) translate3d(-1850px, -3500px, 0)" ng-src="{{a.name | ghPages}}"></iframe>
 			</div>
 		</div>
 	</div>
