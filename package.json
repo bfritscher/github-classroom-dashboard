@@ -38,6 +38,7 @@
     "serve": "grunt serve"
   },
   "dependencies": {
+    "grunt-cli": "^1.4.3",
     "marked": "^0.7.0",
     "node-unzip-2": "^0.2.8",
     "papaparse": "^5.2.0"

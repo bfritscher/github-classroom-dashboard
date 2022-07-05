@@ -105,6 +105,15 @@ angular.module('githubClassroomDashboardApp')
         return checkGHPagesStatus(r);
       })
       .then(function () {
+        return searchString(r, "axios", "axios");
+      })
+      .then(function () {
+        return searchString(r, "props", "props");
+      })
+      .then(function () {
+        return searchString(r, "$emit", "emit");
+      })
+      .then(function () {
         return searchString(r, "console.log", "console");
       })
       .then(function () {

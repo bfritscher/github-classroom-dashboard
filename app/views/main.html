@@ -40,6 +40,9 @@
 			<th>structure/code</th>
 			<th>1 jquery plugin</th>
 			<th>Text readme</th>
+			<th ng-if="debug">axios</th>
+			<th ng-if="debug">props</th>
+			<th ng-if="debug">$emit</th>
 			<th ng-if="debug">console.log</th>
 			<th ng-if="debug">localStorage</th>
 		</tr>
@@ -91,6 +94,21 @@
 			<td></td>
 			<td></td>
 			<td></td>
+			<td ng-if="debug"><div ng-if="a.search">{{a.search.axios.total_count}}
+				<ul>
+					<li ng-repeat="e in a.search.axios.items"><a ng-href="{{e.html_url}}">{{e.path}}</a></li>
+				</ul>
+			</div></td>
+			<td ng-if="debug"><div ng-if="a.search">{{a.search.props.total_count}}
+				<ul>
+					<li ng-repeat="e in a.search.props.items"><a ng-href="{{e.html_url}}">{{e.path}}</a></li>
+				</ul>
+			</div></td>
+			<td ng-if="debug"><div ng-if="a.search">{{a.search.emit.total_count}}
+				<ul>
+					<li ng-repeat="e in a.search.emit.items"><a ng-href="{{e.html_url}}">{{e.path}}</a></li>
+				</ul>
+			</div></td>
 			<td ng-if="debug"><div ng-if="a.search">{{a.search.console.total_count}}
 				<ul>
 					<li ng-repeat="e in a.search.console.items"><a ng-href="{{e.html_url}}">{{e.path}}</a></li>
@@ -124,9 +142,14 @@
 			<span class="zoom-toggle" ng-if="main.zoom == a" ng-click="main.zoom = null">close</span>
 		</div>
 		<div ng-if="!a.before">
+			<!--
 			<img ng-src="preview/heg-web.github.io!{{a.name}}-phone.png"/>
 			<img ng-src="preview/heg-web.github.io!{{a.name}}-tablet.png"/>
 			<img ng-src="preview/heg-web.github.io!{{a.name}}-desktop.png"/>
+			-->
+			<div>
+				<iframe style="position:absolute; width: 1600px; height: 3000px; transform: scale3d(0.3, 0.3, 1) translate3d(-1850px, -3500px, 0)" ng-src="{{a.name | ghReadme}}"></iframe>
+			</div>
 		</div>
 		<div ng-if="a.before" class="preview-iframes">
 			<div ng-if="displayMobilePreview">

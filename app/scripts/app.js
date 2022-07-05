@@ -40,4 +40,9 @@ angular
   return function(repo) {
     return $sce.trustAsResourceUrl('https://heg-web.github.io/' + repo);
   };
+})
+.filter('ghReadme', function ($sce) {
+  return function(repo) {
+    return $sce.trustAsResourceUrl('https://github.com/heg-web/'+ repo +'#readme');
+  };
 });
