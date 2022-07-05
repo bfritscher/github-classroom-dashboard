@@ -82,6 +82,24 @@ angular.module('githubClassroomDashboardApp')
             }
           });
         });
+        // Quick workaround because we are over 100
+        $http.get(API + 'orgs/' + org + '/repos?per_page=100&page=2') //page=2&
+        .then(function (response) {
+          //TODO: handle multipage
+          response.data.filter(function (repo) {
+            return !(repo.name.indexOf('cfrancillon') !== -1 || repo.name.indexOf('bfritscher') !== -1);
+          }).forEach(function (repo) {
+            if (repo.name.indexOf(main.classroomProjectPrefix) === 0) {
+              var r = { name: repo.name };
+              if (main.assignments.hasOwnProperty(repo.name)) {
+                r = main.assignments[repo.name];
+              } else {
+                main.assignments[repo.name] = r;
+              }
+              main.refreshAssignment(r)
+            }
+          });
+        });
     };
 
     main.refreshAssignment = (r) => {
