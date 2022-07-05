@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "grunt-cli": "^1.4.3",
-    "marked": "^0.7.0",
+    "marked": "^4.0.10",
     "node-unzip-2": "^0.2.8",
     "papaparse": "^5.2.0"
   }
