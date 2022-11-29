@@ -1,19 +1,35 @@
 # github-classroom-dashboard
 
-Using github api to check multiple aspects about the assignment.
-Result is displayed in a summary table with direct links to the github objects.
+This template should help get you started developing with Vue 3 in Vite.
 
-for thumbnails install:
-  npm install --global capture-website-cli
+## Recommended IDE Setup
 
-click login to get `code` in url
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-  POST https://github.com/login/oauth/access_token
+## Customize configuration
 
-```json
-{
-	"client_id": "0f49b767798fd5815a80",
-	"client_secret": "",
-	"code": ""
-}
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
+```
+
+### Compile and Hot-Reload for Development
+
+```sh
+npm run dev
+```
+
+### Compile and Minify for Production
+
+```sh
+npm run build
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
 ```
