@@ -3,47 +3,34 @@ import axios from "axios";
 import Papa from "papaparse";
 import { marked } from "marked";
 import { ref, computed, reactive } from "vue";
+import { b64DecodeUnicode, repoToGhPagesUrl, filterBots } from "./filters.js";
+import { API, GITHUB_ORG } from "./config.js";
 
-//if url search location contains param code
+// helper for access_token
 const urlParams = new URLSearchParams(window.location.search);
 const showAuthInfo = ref(urlParams.get("code", false));
 const loginPostCurl = computed(() => {
   return `curl -X POST https://github.com/login/oauth/access_token -H 'Content-Type: application/json' -d '{"client_id": "0f49b767798fd5815a80", "client_secret": "", "code": "${showAuthInfo.value}"}'`;
 });
 
-function b64DecodeUnicode(str) {
-  // Going backwards: from bytestream, to percent-encoding, to original string.
-  return decodeURIComponent(
-    atob(str)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join("")
-  );
-}
-
-function ghPages(repo) {
-  return "https://heg-web.github.io/" + repo;
-}
-
-const main = reactive({});
-main.ghApi = {
-  rateLimit: {
-    remaining: 0,
-    limit: 0,
-    reset: 0,
-    resetCoutdown() {
-      return Math.round(
-        (main.ghApi.rateLimit.reset * 1000 - new Date().getTime()) / (60 * 1000)
-      );
+const main = reactive({
+  ghApi: {
+    rateLimit: {
+      remaining: 0,
+      limit: 0,
+      reset: 0,
+      resetCoutdown() {
+        return Math.round(
+          (main.ghApi.rateLimit.reset * 1000 - new Date().getTime()) /
+            (60 * 1000)
+        );
+      },
     },
   },
-};
-main.evals = [];
-main.evalsDone = [];
-
-main.lookup = {};
+  evals: [],
+  evalsDone: [],
+  githubUsernameLookup: {},
+});
 
 axios.interceptors.request.use((config) => {
   if (main.ghApi.access_token) {
@@ -52,59 +39,55 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
-// Add a response interceptor
 axios.interceptors.response.use((response) => {
   // Do something with response data
   if (response.headers) {
     console.log(response.headers);
-    main.ghApi.rateLimit.remaining = parseInt(response.headers["x-ratelimit-remaining"], 10);
-    main.ghApi.rateLimit.limit = parseInt(response.headers["x-ratelimit-limit"], 10);
-    main.ghApi.rateLimit.reset = parseInt(response.headers["x-ratelimit-reset"], 10);
+    main.ghApi.rateLimit.remaining = parseInt(
+      response.headers["x-ratelimit-remaining"],
+      10
+    );
+    main.ghApi.rateLimit.limit = parseInt(
+      response.headers["x-ratelimit-limit"],
+      10
+    );
+    main.ghApi.rateLimit.reset = parseInt(
+      response.headers["x-ratelimit-reset"],
+      10
+    );
   }
   return response;
 });
 
-Papa.parse("/preview/classroom_roster.csv", {
+Papa.parse("/classroom_roster.csv", {
   download: true,
   header: true,
   complete: (results) => {
     results.data.forEach((e) => {
-      main.lookup[e.github_username] = e.identifier;
+      main.githubUsernameLookup[e.github_username] = e.identifier;
     });
   },
 });
 
-var org = "heg-web";
-var API = "https://api.github.com/";
 main.assignments = JSON.parse(localStorage.getItem("assignments") || "{}");
 main.classroomProjectPrefix = localStorage.getItem("classroomProjectPrefix");
-main.saveProjectPrefix = function () {
+
+function saveProjectPrefix() {
   localStorage.setItem("classroomProjectPrefix", main.classroomProjectPrefix);
-};
-main.clear = function () {
+}
+
+function clear() {
   main.assignments = {};
   main.evals = [];
   main.evalsDone = [];
-};
-
-main.before = false;
-main.switchPreview = function () {
-  main.before = !main.before;
-  Object.keys(main.assignments).forEach(function (k) {
-    var a = main.assignments[k];
-    a.before = main.before;
-  });
-};
-function filterBots(users) {
-  return users.filter((user) => !user.login.includes("heg-web-bot"));
 }
 
-main.refresh = function () {
+function refresh() {
   main.ghApi.access_token =
     localStorage.getItem("access_token") || window.prompt("access_token");
   localStorage.setItem("access_token", main.ghApi.access_token);
   axios
-    .get(API + "orgs/" + org + "/repos?per_page=100") //page=2&
+    .get(`${API}orgs/${GITHUB_ORG}/repos?per_page=100`) //page=2&
     .then(function (response) {
       //TODO: handle multipage
       response.data
@@ -119,13 +102,13 @@ main.refresh = function () {
             } else {
               main.assignments[repo.name] = r;
             }
-            main.refreshAssignment(r);
+            refreshAssignment(r);
           }
         });
     });
   // Quick workaround because we are over 100
   axios
-    .get(API + "orgs/" + org + "/repos?per_page=100&page=2") //page=2&
+    .get(`${API}orgs/${GITHUB_ORG}/repos?per_page=100&page=2`) //page=2&
     .then(function (response) {
       //TODO: handle multipage
       response.data
@@ -140,13 +123,13 @@ main.refresh = function () {
             } else {
               main.assignments[repo.name] = r;
             }
-            main.refreshAssignment(r);
+            refreshAssignment(r);
           }
         });
     });
-};
+}
 
-main.refreshAssignment = (r) => {
+function refreshAssignment(r) {
   main.ghApi.access_token = localStorage.getItem("access_token");
   getCollaborators(r)
     .then(function () {
@@ -191,23 +174,18 @@ main.refreshAssignment = (r) => {
     .then(function () {
       localStorage.setItem("assignments", JSON.stringify(main.assignments));
     });
-};
+}
 
-main.getUrls = function () {
+function getUrls() {
   return (
     "data:text/plain;charset=utf-8," +
     encodeURIComponent(
       Object.keys(main.assignments).reduce(function (list, key) {
-        return (
-          list +
-          "https://heg-web.github.io/" +
-          main.assignments[key].name +
-          "\n"
-        );
+        return list + repoToGhPagesUrl(main.assignments[key].name) + "\n";
       }, "")
     )
   );
-};
+}
 
 function searchString(r, str, key) {
   main.ghApi.access_token = localStorage.getItem("access_token");
@@ -217,16 +195,19 @@ function searchString(r, str, key) {
   return axios
     .get(
       API +
-      `search/code?q=${str}+in:file+extension:js+extension:vue+repo:${org}/${r.name}`
+        `search/code?q=${str}+in:file+extension:js+extension:vue+repo:${GITHUB_ORG}/${r.name}`
     )
-    .then(function (response) {
-      r.search[key] = response.data;
-    }, () => { });
+    .then(
+      function (response) {
+        r.search[key] = response.data;
+      },
+      () => {}
+    );
 }
 
-main.loginToMatricule = function (login) {
-  return main.lookup[login];
-};
+function githubUsernameToIdentifier(login) {
+  return main.githubUsernameLookup[login];
+}
 
 main.commitCount = function (commits, u) {
   if (commits) {
@@ -251,33 +232,45 @@ function checkBranches(r) {
   r.hasMaster = false;
   r.hasMain = false;
   r.hasGhPages = false;
-  return axios.get(API + "repos/" + org + "/" + r.name + "/branches").then(
-    (response) => {
-      r.branches = response.data.map(function (branch) {
-        if (branch.name === "gh-pages") {
-          r.hasGhPages = true;
-        }
-        if (branch.name === "main") {
-          r.hasMain = true;
-        }
-        if (branch.name === "master") {
-          r.hasMaster = true;
-        }
-        return branch.name;
-      });
-    },
-    () => { }
-  );
+  return axios
+    .get(API + "repos/" + GITHUB_ORG + "/" + r.name + "/branches")
+    .then(
+      (response) => {
+        r.branches = response.data.map(function (branch) {
+          if (branch.name === "gh-pages") {
+            r.hasGhPages = true;
+          }
+          if (branch.name === "main") {
+            r.hasMain = true;
+          }
+          if (branch.name === "master") {
+            r.hasMaster = true;
+          }
+          return branch.name;
+        });
+      },
+      () => {}
+    );
 }
 
 function checkGhPagesVendor(r) {
   r.hasVendor = false;
   return axios
-    .get(API + "repos/" + org + "/" + r.name + "/contents/assets?ref=gh-pages")
+    .get(
+      API +
+        "repos/" +
+        GITHUB_ORG +
+        "/" +
+        r.name +
+        "/contents/assets?ref=gh-pages"
+    )
     .then(
       function (response) {
         for (var i = 0; i < response.data.length; i++) {
-          if (response.data[i].name.indexOf("index") === 0 && response.data[i].name.split(".").length === 3) {
+          if (
+            response.data[i].name.indexOf("index") === 0 &&
+            response.data[i].name.split(".").length === 3
+          ) {
             r.hasVendor = true;
             return;
           }
@@ -294,12 +287,12 @@ function checkMasterSrc(r) {
   return axios
     .get(
       API +
-      "repos/" +
-      org +
-      "/" +
-      r.name +
-      "/contents/?ref=" +
-      (r.hasMain ? "main" : "master")
+        "repos/" +
+        GITHUB_ORG +
+        "/" +
+        r.name +
+        "/contents/?ref=" +
+        (r.hasMain ? "main" : "master")
     )
     .then(
       function (response) {
@@ -320,7 +313,12 @@ function checkTitle(r) {
   r.title = false;
   return axios
     .get(
-      API + "repos/" + org + "/" + r.name + "/contents/index.html?ref=gh-pages"
+      API +
+        "repos/" +
+        GITHUB_ORG +
+        "/" +
+        r.name +
+        "/contents/index.html?ref=gh-pages"
     )
     .then(
       function (response) {
@@ -347,7 +345,7 @@ function checkTitle(r) {
 function checkReleases(r) {
   r.hasRelease = false;
   r.releaseSha = "";
-  return axios.get(API + "repos/" + org + "/" + r.name + "/tags").then(
+  return axios.get(API + "repos/" + GITHUB_ORG + "/" + r.name + "/tags").then(
     function (response) {
       r.releases = response.data.map(function (release) {
         if (release.name === "2.0.0") {
@@ -358,17 +356,17 @@ function checkReleases(r) {
         return release.name;
       });
     },
-    () => { }
+    () => {}
   );
 }
 
 function checkGHPagesStatus(r) {
   main.ghApi.access_token = localStorage.getItem("access_token");
-  return axios.get(API + "repos/" + org + "/" + r.name + "/pages").then(
+  return axios.get(API + "repos/" + GITHUB_ORG + "/" + r.name + "/pages").then(
     function (response) {
       r.ghPagesStatus = response.data.status;
     },
-    () => { }
+    () => {}
   );
 }
 
@@ -376,7 +374,7 @@ function enableGHPages(r) {
   main.ghApi.access_token = localStorage.getItem("access_token");
   const req = {
     method: "POST",
-    url: API + "repos/" + org + "/" + r.name + "/pages",
+    url: API + "repos/" + GITHUB_ORG + "/" + r.name + "/pages",
     headers: {
       Accept: "application/vnd.github.switcheroo-preview+json",
     },
@@ -396,7 +394,7 @@ main.enableGHPages = enableGHPages;
 
 function checkReadme(r) {
   r.hasReadme = false;
-  return axios.get(API + "repos/" + org + "/" + r.name + "/readme").then(
+  return axios.get(API + "repos/" + GITHUB_ORG + "/" + r.name + "/readme").then(
     function (response) {
       r.hasReadme = response.data.name.indexOf(".md") > -1;
       r.readmeUrl = response.data.html_url;
@@ -408,26 +406,34 @@ function checkReadme(r) {
 }
 
 function getCollaborators(r) {
-  return axios.get(API + "repos/" + org + "/" + r.name + "/collaborators").then(
-    function (response) {
-      r.users = response.data
-        .filter(function (c) {
-          return c.login !== "bfritscher";
-        })
-        .map(function (c) {
-          var u = { login: c.login };
-          getUser(u);
-          return u;
-        });
-    },
-    () => { }
-  );
+  return axios
+    .get(API + "repos/" + GITHUB_ORG + "/" + r.name + "/collaborators")
+    .then(
+      function (response) {
+        r.users = response.data
+          .filter(function (c) {
+            return c.login !== "bfritscher";
+          })
+          .map(function (c) {
+            var u = { login: c.login };
+            getUser(u);
+            return u;
+          });
+      },
+      () => {}
+    );
 }
 
 function getCommitsPage(r, page) {
   return axios
     .get(
-      API + "repos/" + org + "/" + r.name + "/commits?per_page=100&page=" + page
+      API +
+        "repos/" +
+        GITHUB_ORG +
+        "/" +
+        r.name +
+        "/commits?per_page=100&page=" +
+        page
     )
     .then(
       function (response) {
@@ -456,12 +462,13 @@ function getUser(u) {
     function (response) {
       u.name = response.data.name;
     },
-    () => { }
+    () => {}
   );
 }
 
+// ISSUE HANDLING
 function createIssue() {
-  ghApi.access_token = localStorage.getItem("access_token");
+  main.ghApi.access_token = localStorage.getItem("access_token");
   const evaluation = main.evals.pop();
   if (evaluation) {
     const issue = {
@@ -469,7 +476,10 @@ function createIssue() {
       body: evaluation.md,
     };
     axios
-      .post(API + "repos/" + org + "/" + evaluation.repo + "/issues", issue)
+      .post(
+        API + "repos/" + GITHUB_ORG + "/" + evaluation.repo + "/issues",
+        issue
+      )
       .then(function (response) {
         main.evalsDone.push({
           repo: evaluation.repo,
@@ -519,15 +529,13 @@ function parseCSV(file) {
   });
 }
 
-main.handleFileSelect = function (event) {
-  var file = event.target.files[0];
+function handleFileSelect(event) {
+  const file = event.target.files[0];
   parseCSV(file);
-};
+}
 
-main.createIssue = createIssue;
-
+// UI states
 const debug = ref(false);
-const showpic = ref(false);
 const displayMobilePreview = ref(false);
 </script>
 
@@ -545,19 +553,30 @@ const displayMobilePreview = ref(false);
       {{ main.ghApi.rateLimit.resetCoutdown() }} min
     </p>
     <a
-      href="https://github.com/login/oauth/authorize?client_id=0f49b767798fd5815a80&scope=read:org,repo&state=test">login</a>
-    <button @click="main.refresh()">refresh data</button>
+      href="https://github.com/login/oauth/authorize?client_id=0f49b767798fd5815a80&scope=read:org,repo&state=test"
+      >login</a
+    >
+    <button @click="refresh()">refresh data</button>
     <label><input type="checkbox" v-model="debug" /> debug</label>
-    <label><input type="checkbox" v-model="showpic" /> showpic</label>
-    <label>Feedback:
-      <input placeholder="prefix" type="text" @change="main.saveProjectPrefix()"
-        v-model="main.classroomProjectPrefix" /></label>
-    <button @click="main.clear()">clear</button>
-    <input type="file" custom-on-change="main.handleFileSelect" />
+    <label
+      >Feedback:
+      <input
+        placeholder="prefix"
+        type="text"
+        @change="saveProjectPrefix()"
+        v-model="main.classroomProjectPrefix"
+    /></label>
+    <button @click="clear()">clear</button>
+    <input type="file" @change="handleFileSelect" />
     <div v-if="main.evals.length > 0 || main.evalsDone.length > 0">
       <h2>Evaluations {{ main.evals.length }}</h2>
-      <div class="eval" v-for="ev in main.evals" v-html="ev.preview" :key="ev.repo"></div>
-      <button @click="main.createIssue()">Create Issues on GitHUB</button>
+      <div
+        class="eval"
+        v-for="ev in main.evals"
+        v-html="ev.preview"
+        :key="ev.repo"
+      ></div>
+      <button @click="createIssue()">Create Issues on GitHUB</button>
       <p>Done: {{ main.evalsDone.length }}</p>
       <ul>
         <li v-for="done in main.evalsDone" :key="done.repo">
@@ -598,67 +617,94 @@ const displayMobilePreview = ref(false);
       </thead>
       <tbody>
         <tr v-for="(a, name, index) in main.assignments" :key="name">
-          <td @click="main.refreshAssignment(a)">{{ index + 1 }}</td>
+          <td @click="refreshAssignment(a)">{{ index + 1 }}</td>
           <td>{{ name }}</td>
           <td v-if="debug">
             <div class="student" v-for="u in a.users" :key="u.login">
-              {{ main.loginToMatricule(u.login) }}
+              {{ githubUsernameToIdentifier(u.login) }}
             </div>
           </td>
           <td>
-            <span class="student" v-for="u in filterBots(a.users || [])" :key="u.login">{{ u.name }}
+            <span
+              class="student"
+              v-for="u in filterBots(a.users || [])"
+              :key="u.login"
+              >{{ u.name }}
               <span v-if="!u.name || debug">({{ u.login }})</span>
               <b>[{{ main.commitCount(a.commits, u) }}]</b>
-              <div v-if="showpic">
-                <img :src="`https://amc.ig.he-arc.ch/sdb/images/students/${main.loginToMatricule(
-                  u.login
-                )}.jpg`" />
-              </div>
             </span>
           </td>
 
-          <td :class="{
-            correct: a.hasMaster || a.hasMain,
-            wrong: !(a.hasMaster || a.hasMain),
-          }">
-            <a target="_blank" :href="`https://github.com/heg-web/${a.name}/tree/master`">{{ a.hasMaster || a.hasMain
-            }}</a>
+          <td
+            :class="{
+              correct: a.hasMaster || a.hasMain,
+              wrong: !(a.hasMaster || a.hasMain),
+            }"
+          >
+            <a
+              target="_blank"
+              :href="`https://github.com/heg-web/${a.name}/tree/master`"
+              >{{ a.hasMaster || a.hasMain }}</a
+            >
           </td>
           <td :class="{ correct: a.isMasterSrc, wrong: !a.isMasterSrc }">
-            <a target="_blank" :href="`https://github.com/heg-web/${a.name}/tree/master`">{{ a.isMasterSrc }}</a>
+            <a
+              target="_blank"
+              :href="`https://github.com/heg-web/${a.name}/tree/master`"
+              >{{ a.isMasterSrc }}</a
+            >
           </td>
           <td :class="{ correct: a.hasGhPages, wrong: !a.hasGhPages }">
-            <a target="_blank" :href="`https://github.com/heg-web/${a.name}/tree/gh-pages`">{{ a.hasGhPages }}</a>
+            <a
+              target="_blank"
+              :href="`https://github.com/heg-web/${a.name}/tree/gh-pages`"
+              >{{ a.hasGhPages }}</a
+            >
           </td>
-          <td v-if="debug" :class="{
-            correct: a.ghPagesStatus == 'built',
-            wrong: !a.ghPagesStatus || a.ghPagesStatus != 'built',
-          }">
-            <button v-if="!a.ghPagesStatus && a.hasGhPages" @click="main.enableGHPages(a)">
-              enable</button>{{ a.ghPagesStatus }}
+          <td
+            v-if="debug"
+            :class="{
+              correct: a.ghPagesStatus == 'built',
+              wrong: !a.ghPagesStatus || a.ghPagesStatus != 'built',
+            }"
+          >
+            <button
+              v-if="!a.ghPagesStatus && a.hasGhPages"
+              @click="main.enableGHPages(a)"
+            >
+              enable</button
+            >{{ a.ghPagesStatus }}
           </td>
 
           <td :class="{ correct: a.hasVendor, wrong: !a.hasVendor }">
             <a target="_blank" :href="`https://heg-web.github.io/${a.name}`">{{
-                a.hasVendor
+              a.hasVendor
             }}</a>
           </td>
           <td :class="{ correct: a.hasReadme, wrong: !a.hasReadme }">
             <a target="_blank" :href="a.readmeUrl">{{ a.hasReadme }}</a>
           </td>
           <td :class="{ correct: a.hasRelease, wrong: !a.hasRelease }">
-            <a target="_blank" :href="`https://github.com/heg-web/${a.name}/tree/${a.releaseSha}`">{{ a.hasRelease
-            }}</a>
+            <a
+              target="_blank"
+              :href="`https://github.com/heg-web/${a.name}/tree/${a.releaseSha}`"
+              >{{ a.hasRelease }}</a
+            >
           </td>
           <td>
-            <a target="_blank" :href="`https://github.com/heg-web/${a.name}/blob/${a.releaseSha}main/index.html`">{{
-                a.title
-            }}</a>
+            <a
+              target="_blank"
+              :href="`https://github.com/heg-web/${a.name}/blob/${a.releaseSha}main/index.html`"
+              >{{ a.title }}</a
+            >
           </td>
-          <td v-if="debug" @click="
-  main.commiterIndex = [];
-main.commits = a.commits;
-          ">
+          <td
+            v-if="debug"
+            @click="
+              main.commiterIndex = [];
+              main.commits = a.commits;
+            "
+          >
             {{ a.commits.length }}
           </td>
           <td v-if="debug">{{ a.branches }}</td>
@@ -712,7 +758,10 @@ main.commits = a.commits;
             <div v-if="a.search.localStorage">
               {{ a.search.localStorage.total_count }}
               <ul>
-                <li v-for="(e, index) in a.search.localStorage.items" :key="index">
+                <li
+                  v-for="(e, index) in a.search.localStorage.items"
+                  :key="index"
+                >
                   <a :href="e.html_url">{{ e.path }}</a>
                 </li>
               </ul>
@@ -722,61 +771,93 @@ main.commits = a.commits;
       </tbody>
     </table>
     <div>
-      <div v-for="c in main.commits" class="commiter{{main.getCommiterIndex(c.commit.author.name)}}" :key="c.sha">
+      <div
+        v-for="c in main.commits"
+        class="commiter{{main.getCommiterIndex(c.commit.author.name)}}"
+        :key="c.sha"
+      >
         <i>{{ c.commit.author.name }}</i>
         {{ c.commit.author.date }}
-        <a target="_blank" :href="c.html_url" :class="{ merge: c.commit.message.indexOf('Merge') == 0 }">{{
-            c.commit.message
-        }}</a>
+        <a
+          target="_blank"
+          :href="c.html_url"
+          :class="{ merge: c.commit.message.indexOf('Merge') == 0 }"
+          >{{ c.commit.message }}</a
+        >
       </div>
     </div>
-    <a :href="main.getUrls()" download="urls.txt">download urls.txt</a>
+    <a :href="getUrls()" download="urls.txt">download urls.txt</a>
 
-    <h2>
-      Preview</h2>
+    <h2>Preview</h2>
     <input type="checkbox" v-model="displayMobilePreview" /> Mobile
     <div id="preview" :class="{ noMobile: !displayMobilePreview }">
-      <div class="preview" :class="{ 'preview-zoom': main.zoom == a }" v-for="a in main.assignments" :key="a.name">
+      <div
+        class="preview"
+        :class="{ 'preview-zoom': main.zoom == a }"
+        v-for="a in main.assignments"
+        :key="a.name"
+      >
         <div>
-          <a target="_blank" :href="`https://heg-web.github.io/${a.name}`">{{ a.name }}
+          <a target="_blank" :href="`https://heg-web.github.io/${a.name}`"
+            >{{ a.name }}
             <span :class="{ correct: a.hasVendor, wrong: !a.hasVendor }">{{
-                a.hasVendor
-            }}</span></a>
-          <span class="zoom-toggle" v-if="main.zoom != a" @click="main.zoom = a">show</span>
-          <span class="zoom-toggle" v-if="main.zoom == a" @click="main.zoom = null">close</span>
+              a.hasVendor
+            }}</span></a
+          >
+          <span class="zoom-toggle" v-if="main.zoom != a" @click="main.zoom = a"
+            >show</span
+          >
+          <span
+            class="zoom-toggle"
+            v-if="main.zoom == a"
+            @click="main.zoom = null"
+            >close</span
+          >
         </div>
-        <div  class="preview-iframes">
+        <div class="preview-iframes">
           <div v-if="displayMobilePreview">
-            <iframe style="
+            <iframe
+              style="
                 position: absolute;
                 width: 640px;
                 height: 3000px;
                 transform: scale3d(0.2, 0.2, 1) translate3d(-1300px, -6000px, 0);
-              " :src="ghPages(a.name)"></iframe>
+              "
+              :src="repoToGhPagesUrl(a.name)"
+            ></iframe>
           </div>
           <div v-if="displayMobilePreview">
-            <iframe style="
+            <iframe
+              style="
                 position: absolute;
                 width: 1024px;
                 height: 3000px;
                 transform: scale3d(0.2, 0.2, 1) translate3d(-2040px, -6000px, 0);
-              " :src="ghPages(a.name)"></iframe>
+              "
+              :src="repoToGhPagesUrl(a.name)"
+            ></iframe>
           </div>
           <div v-if="displayMobilePreview">
-            <iframe style="
+            <iframe
+              style="
                 position: absolute;
                 width: 1600px;
                 height: 3000px;
                 transform: scale3d(0.2, 0.2, 1) translate3d(-3200px, -6000px, 0);
-              " :src="ghPages(a.name)"></iframe>
+              "
+              :src="repoToGhPagesUrl(a.name)"
+            ></iframe>
           </div>
           <div v-if="!displayMobilePreview">
-            <iframe style="
+            <iframe
+              style="
                 position: absolute;
                 width: 1600px;
                 height: 3000px;
                 transform: scale3d(0.3, 0.3, 1) translate3d(-1850px, -3500px, 0);
-              " :src="ghPages(a.name)"></iframe>
+              "
+              :src="repoToGhPagesUrl(a.name)"
+            ></iframe>
           </div>
         </div>
       </div>
@@ -839,7 +920,7 @@ tbody td {
   z-index: 9999;
 }
 
-.preview-zoom .preview-iframes>div {
+.preview-zoom .preview-iframes > div {
   height: 100vh;
 }
 
@@ -861,28 +942,28 @@ tbody td {
 }
 
 .preview img:nth-child(1),
-.preview .preview-iframes>div:nth-child(1) {
+.preview .preview-iframes > div:nth-child(1) {
   width: 20%;
 }
 
 .preview img:nth-child(2),
-.preview .preview-iframes>div:nth-child(2) {
+.preview .preview-iframes > div:nth-child(2) {
   width: 32%;
 }
 
 .preview img:nth-child(3),
-.preview .preview-iframes>div:nth-child(3) {
+.preview .preview-iframes > div:nth-child(3) {
   width: 46%;
 }
 
-.preview-iframes>div {
+.preview-iframes > div {
   position: relative;
   height: 400px;
   overflow: auto;
   float: left;
 }
 
-.noMobile .preview-iframes>div {
+.noMobile .preview-iframes > div {
   width: 100% !important;
 }
 
