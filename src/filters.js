@@ -18,3 +18,7 @@ export function repoToGhPagesUrl(repo) {
 export function toRepoAPI(name) {
   return `${API}repos/${GITHUB_ORG}/${name}`;
 }
+
+export function toRepo(name) {
+  return `https://github.com/${GITHUB_ORG}/${name}`;
+}

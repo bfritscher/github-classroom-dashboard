@@ -1,13 +1,6 @@
-- refactor
-    - components
-        - new checks
-            - check vite.config.js github subfolder mapping?
-            - extract dependencies from package.json
-    - split into pages preview/upload issues
-    - handle on/off debug
-    - handle css color if
-    - track/display api errors
-    - store?
-
-- filter table
-- throttle api calls
+- fix commit list display
+- handle on/off debug / show hide details
+- test create issues
+- test fix links
+- css / layout
+- pics?

@@ -1,12 +1,12 @@
 <template>
-  <a target="_blank" :href="`${repoUrl}/blob/gh-pages/index.html`">
+  <a target="_blank" :href="`${repoUrl}/gh-pages/index.html`">
     {{ props.repo.title }}
   </a>
 </template>
 <script>
 import axios from "axios";
 import { computed } from "vue";
-import { b64DecodeUnicode, toRepoAPI } from "../filters.js";
+import { b64DecodeUnicode, toRepoAPI, toRepo } from "../filters.js";
 
 function checkIndex(repo) {
   repo.title = false;
@@ -37,7 +37,7 @@ export default {
   title: "Title",
   check: checkIndex,
   setup(props) {
-    return { props, repoUrl: computed(() => toRepoAPI(props.repo.name)) };
+    return { props, repoUrl: computed(() => toRepo(props.repo.name)) };
   },
 };
 </script>
