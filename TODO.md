@@ -1,2 +1,13 @@
 - refactor
-- check vite.config.js github subfolder mapping?
+    - components
+        - new checks
+            - check vite.config.js github subfolder mapping?
+            - extract dependencies from package.json
+    - split into pages preview/upload issues
+    - handle on/off debug
+    - handle css color if
+    - track/display api errors
+    - store?
+
+- filter table
+- throttle api calls
