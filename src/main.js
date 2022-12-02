@@ -19,9 +19,12 @@ export const main = reactive({
   },
   showDetails: false,
   showSearch: false,
+  showPic: false,
+  assignments: JSON.parse(localStorage.getItem("assignments") || "{}"),
+  classroomProjectPrefix: localStorage.getItem("classroomProjectPrefix"),
+  commits: [],
+  commiterIndex: [],
 });
-main.assignments = JSON.parse(localStorage.getItem("assignments") || "{}");
-main.classroomProjectPrefix = localStorage.getItem("classroomProjectPrefix");
 
 import App from "./App.vue";
 import router from "./router";

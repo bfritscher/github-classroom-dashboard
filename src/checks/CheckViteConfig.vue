@@ -1,7 +1,7 @@
 <template>
   <a
     target="_blank"
-    :href="`${repoUrl}/${repo.hasMain ? 'main' : 'master'}/vite.config.js`"
+    :href="`${repoUrl}/blob/${repo.hasMain ? 'main' : 'master'}/vite.config.js`"
   >
     {{ main.showDetails ? props.repo.viteConfigBase : isCorrect(props.repo) }}
   </a>

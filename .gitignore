@@ -1,4 +1,6 @@
 classroom_roster.csv
+pics/
+students.json
 # Logs
 logs
 *.log

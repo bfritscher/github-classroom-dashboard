@@ -141,6 +141,9 @@ a.router-link-exact-active {
   color: #ffffff;
   background: #509ee3;
 }
+label {
+  cursor: pointer;
+}
 
 button,
 .btn {

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="props.repo.search[props.args[1]]">
+  <div v-if="props.repo.search && props.repo.search[props.args[1]]">
     {{ props.repo.search[props.args[1]].total_count }}
     <ul v-if="main.showDetails">
       <li

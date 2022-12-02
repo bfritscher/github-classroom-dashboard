@@ -1,5 +1,10 @@
 <template>
   <div v-for="u in props.repo.users" :key="u.login">
+    <img
+      v-if="main.showPic"
+      class="profile"
+      :src="`/pics/${githubUsernameLookupPics[u.login].matricule_isa}.jpg`"
+    />
     {{ githubUsernameLookup[u.login] || u.login }}
   </div>
 </template>
@@ -7,7 +12,12 @@
 import axios from "axios";
 import { USERNAME_BLACKLIST } from "../config.js";
 import { toRepoAPI } from "../filters.js";
-import { addNameToUserFromGithub, githubUsernameLookup } from "../api.js";
+import { main } from "../main.js";
+import {
+  addNameToUserFromGithub,
+  githubUsernameLookup,
+  githubUsernameLookupPics,
+} from "../api.js";
 export default {
   props: {
     repo: Object,
@@ -25,7 +35,16 @@ export default {
       });
   },
   setup(props) {
-    return { props, githubUsernameLookup };
+    return { main, props, githubUsernameLookup, githubUsernameLookupPics };
   },
 };
 </script>
+<style scoped>
+.profile {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+</style>

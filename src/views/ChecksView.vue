@@ -1,13 +1,12 @@
 <script setup>
 import axios from "axios";
-import { repoToGhPagesUrl, toRepoAPI } from "../filters.js";
+import { repoToGhPagesUrl, toRepo } from "../filters.js";
 import { main } from "../main.js";
 import { API, GITHUB_ORG, USERNAME_BLACKLIST } from "../config.js";
 import CheckCollaborators from "../checks/CheckCollaborators.vue";
 import CheckCommits from "../checks/CheckCommits.vue";
 import CheckBranches from "../checks/CheckBranches.vue";
 import CheckGhPagesIsDist from "../checks/CheckGhPagesIsDist.vue";
-import CheckMainIsSrc from "../checks/CheckMainIsSrc.vue";
 import CheckRelease from "../checks/CheckRelease.vue";
 import CheckGhPagesStatus from "../checks/CheckGhPagesStatus.vue";
 import CheckReadme from "../checks/CheckReadme.vue";
@@ -16,7 +15,7 @@ import DisplayValue from "../checks/DisplayValue.vue";
 import SearchString from "../checks/SearchString.vue";
 import CheckDependencies from "../checks/CheckDependencies.vue";
 import CheckViteConfig from "../checks/CheckViteConfig.vue";
-import { computed } from "vue";
+import { computed, reactive } from "vue";
 
 const assignmentsChecks = [
   CheckCollaborators,
@@ -24,13 +23,12 @@ const assignmentsChecks = [
   {
     component: DisplayValue,
     title: "Main",
-    args: ["hasMain", (repo) => `${toRepoAPI(repo.name)}/tree/main`],
+    args: ["hasMain", (repo) => `${toRepo(repo.name)}/tree/main`],
   },
-  CheckMainIsSrc,
   {
     component: DisplayValue,
     title: "GhPages",
-    args: ["hasGhPages", (repo) => `${toRepoAPI(repo.name)}/tree/gh-pages`],
+    args: ["hasGhPages", (repo) => `${toRepo(repo.name)}/tree/gh-pages`],
   },
   CheckGhPagesStatus,
   CheckGhPagesIsDist,
@@ -91,6 +89,14 @@ const assignmentsChecksFiltered = computed(() => {
   });
 });
 
+const sortedAssignments = computed(() => {
+  return Object.keys(main.assignments).sort((a, b) => {
+    const repoA = main.assignments[a];
+    const repoB = main.assignments[b];
+    return repoA.name.localeCompare(repoB.name);
+  });
+});
+
 function getUrls() {
   return (
     "data:text/plain;charset=utf-8," +
@@ -132,7 +138,7 @@ function refresh() {
             );
           })
           .forEach((repo) => {
-            let r = { name: repo.name };
+            let r = reactive({ name: repo.name });
             if (
               Object.prototype.hasOwnProperty.call(main.assignments, repo.name)
             ) {
@@ -155,7 +161,7 @@ function refresh() {
 async function refreshAssignment(repo) {
   repo.errors = new WeakMap();
   repo.running = new WeakMap();
-  for (const checkComponent of assignmentsChecksFiltered) {
+  for (const checkComponent of assignmentsChecksFiltered.value) {
     await refreshCheckComponent(repo, checkComponent);
   }
 }
@@ -218,7 +224,9 @@ function getCommiterIndex(name) {
 
     <label><input type="checkbox" v-model="main.showDetails" /> Details</label>
     <label><input type="checkbox" v-model="main.showSearch" /> Search</label>
+    <label><input type="checkbox" v-model="main.showPic" /> Pic</label>
     <span class="spacer"></span>
+    <a :href="getUrls()" download="urls.txt">download urls.txt</a>
     <button @click="clear()">clear</button>
   </div>
 
@@ -239,8 +247,10 @@ function getCommiterIndex(name) {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(repo, name, index) in main.assignments" :key="name">
-          <td @click="refreshAssignment(repo)">{{ index + 1 }}</td>
+        <tr v-for="(name, index) in sortedAssignments" :key="name">
+          <td @click="refreshAssignment(main.assignments[name])">
+            {{ index + 1 }}
+          </td>
           <td>{{ name }}</td>
           <td
             v-for="(checkComponent, index) in assignmentsChecksFiltered"
@@ -253,33 +263,37 @@ function getCommiterIndex(name) {
                 ? (checkComponent.component
                     ? checkComponent.component
                     : checkComponent
-                  ).isCorrect(repo, checkComponent.args)
+                  ).isCorrect(main.assignments[name], checkComponent.args)
                   ? 'correct'
                   : (checkComponent.component
                       ? checkComponent.component
                       : checkComponent
-                    ).isCorrect(repo, checkComponent.args) === undefined
+                    ).isCorrect(main.assignments[name], checkComponent.args) ===
+                    undefined
                   ? ''
                   : 'wrong'
                 : ''
             } ${
-              repo.errors &&
-              repo.errors.constructor.name === 'WeakMap' &&
-              repo.errors.has(checkComponent)
+              main.assignments[name].errors &&
+              main.assignments[name].errors.constructor.name === 'WeakMap' &&
+              main.assignments[name].errors.has(checkComponent)
                 ? 'error'
                 : ''
             }
-            
+
                       ${
-                        repo.running &&
-                        repo.running.constructor.name === 'WeakMap' &&
-                        repo.running.has(checkComponent)
-                          ? repo.running.get(checkComponent)
+                        main.assignments[name].running &&
+                        main.assignments[name].running.constructor.name ===
+                          'WeakMap' &&
+                        main.assignments[name].running.has(checkComponent)
+                          ? main.assignments[name].running.get(checkComponent)
                             ? 'running'
                             : 'done'
                           : ''
                       }`"
-            @dblclick="refreshCheckComponent(repo, checkComponent)"
+            @dblclick="
+              refreshCheckComponent(main.assignments[name], checkComponent)
+            "
           >
             <component
               v-if="checkComponent.args"
@@ -288,7 +302,7 @@ function getCommiterIndex(name) {
                   ? checkComponent.component
                   : checkComponent
               "
-              :repo="repo"
+              :repo="main.assignments[name]"
               :args="checkComponent.args"
             />
             <component
@@ -298,7 +312,7 @@ function getCommiterIndex(name) {
                   ? checkComponent.component
                   : checkComponent
               "
-              :repo="repo"
+              :repo="main.assignments[name]"
             />
           </td>
         </tr>
@@ -309,11 +323,11 @@ function getCommiterIndex(name) {
   <div>
     <div
       v-for="c in main.commits"
-      class="commiter{{getCommiterIndex(c.commit.author.name)}}"
+      :class="`commit commiter${getCommiterIndex(c.commit.author.name)}`"
       :key="c.sha"
     >
       <i>{{ c.commit.author.name }}</i>
-      {{ c.commit.author.date }}
+      {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
       <a
         target="_blank"
         :href="c.html_url"
@@ -322,7 +336,6 @@ function getCommiterIndex(name) {
       >
     </div>
   </div>
-  <a :href="getUrls()" download="urls.txt">download urls.txt</a>
 </template>
 
 <style>
@@ -348,15 +361,33 @@ table {
   border-collapse: collapse;
 }
 
+tbody tr:hover {
+  background-color: #ffffcc;
+}
+
 th {
   color: #509ee3;
   border-top: 1px solid #eeecec;
   padding: 0 8px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 tbody td {
   border: 1px solid #eeecec;
   padding: 0 8px;
+}
+.commit {
+  padding: 2px;
+}
+.commiter0 {
+  background-color: #b2e7ff;
+}
+
+.commiter1 {
+  background-color: #d1c8e3;
+}
+
+.merge {
+  background-color: rgb(237, 201, 135);
 }
 </style>

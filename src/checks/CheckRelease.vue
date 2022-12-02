@@ -11,7 +11,7 @@
 <script>
 import axios from "axios";
 import { computed } from "vue";
-import { toRepoAPI } from "../filters.js";
+import { toRepoAPI, toRepo } from "../filters.js";
 
 function checkRelease(repo, tag) {
   repo[`isRelease${tag}`] = false;
@@ -38,7 +38,7 @@ export default {
     return repo["isRelease" + args[0]];
   },
   setup(props) {
-    return { props, repoUrl: computed(() => toRepoAPI(props.repo.name)) };
+    return { props, repoUrl: computed(() => toRepo(props.repo.name)) };
   },
 };
 </script>

@@ -1,14 +1,16 @@
 <template>
-  <span v-for="u in props.repo.users" :key="u.login"
-    >{{ u.name }}
-    <span v-if="!u.name">({{ u.login }})</span>
-    <b>[{{ commitCount(props.repo.commits, u) }}]</b>
-  </span>
+  <div @click="showCommits()">
+    <span v-for="u in props.repo.users" :key="u.login"
+      >{{ u.name }}
+      <span v-if="!u.name">({{ u.login }})</span>
+      <b>[{{ commitCount(props.repo.commits, u) }}]</b>
+    </span>
+  </div>
 </template>
 <script>
-// TODO emit commit list preview
 import axios from "axios";
 import { toRepoAPI } from "../filters.js";
+import { main } from "../main.js";
 
 function getCommitsPage(repo, page) {
   return axios
@@ -48,7 +50,15 @@ export default {
   title: "Commits",
   check: getCommits,
   setup(props) {
-    return { props, commitCount };
+    return {
+      props,
+      commitCount,
+      main,
+      showCommits() {
+        main.commiterIndex = [];
+        main.commits = props.repo.commits;
+      },
+    };
   },
 };
 </script>

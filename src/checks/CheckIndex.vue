@@ -1,7 +1,7 @@
 <template>
   <a
     target="_blank"
-    :href="`${repoUrl}/gh-pages/index.html`"
+    :href="`${repoUrl}/blob/gh-pages/index.html`"
     class="text-nowrap"
   >
     {{ props.repo.title }}
