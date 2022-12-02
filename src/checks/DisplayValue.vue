@@ -1,14 +1,18 @@
 <template>
   <a v-if="props.args[1]" :href="props.args[1](props.repo)" target="_blank">
-    {{ props.repo[props.args[0]] }}
+    <value-or-list :value="props.repo[props.args[0]]" />
   </a>
-  <span v-else>{{ props.repo[props.args[0]] }}</span>
+  <value-or-list v-else :value="props.repo[props.args[0]]" />
 </template>
 <script>
+import ValueOrList from "../components/ValueOrList.vue";
 export default {
   props: {
     repo: Object,
     args: Array,
+  },
+  components: {
+    ValueOrList,
   },
   title: "Display",
   check: async () => {},
@@ -16,7 +20,7 @@ export default {
     return typeof repo[args[0]] === "boolean" ? repo[args[0]] : undefined;
   },
   setup(props) {
-    return { props };
+    return { props, isArray: () => Array.isArray(props.repo[props.args[0]]) };
   },
 };
 </script>

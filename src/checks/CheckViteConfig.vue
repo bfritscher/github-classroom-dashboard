@@ -3,13 +3,14 @@
     target="_blank"
     :href="`${repoUrl}/${repo.hasMain ? 'main' : 'master'}/vite.config.js`"
   >
-    {{ props.repo.viteConfigBase }}
+    {{ main.showDetails ? props.repo.viteConfigBase : isCorrect(props.repo) }}
   </a>
 </template>
 <script>
 import axios from "axios";
 import { computed } from "vue";
 import { b64DecodeUnicode, toRepoAPI, toRepo } from "../filters.js";
+import { main } from "../main.js";
 
 function checkVite(repo) {
   repo.viteConfigBase = "";
@@ -29,17 +30,24 @@ function checkVite(repo) {
     });
 }
 
+function isCorrect(repo) {
+  return repo.viteConfigBaseCorrect;
+}
+
 export default {
   props: {
     repo: Object,
   },
   title: "ViteConfig",
   check: checkVite,
-  isCorrect(repo) {
-    return repo.viteConfigBaseCorrect;
-  },
+  isCorrect,
   setup(props) {
-    return { props, repoUrl: computed(() => toRepo(props.repo.name)) };
+    return {
+      props,
+      main,
+      repoUrl: computed(() => toRepo(props.repo.name)),
+      isCorrect,
+    };
   },
 };
 </script>

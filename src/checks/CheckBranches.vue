@@ -1,10 +1,16 @@
 <template>
-  <span>{{ props.repo.branches }}</span>
+  <span>
+    {{ props.repo.branches?.length }}
+    <ul v-if="main.showDetails">
+      <li v-for="branch in props.repo.branches" :key="branch">{{ branch }}</li>
+    </ul>
+  </span>
 </template>
 <script>
 import axios from "axios";
 import { computed } from "vue";
 import { toRepoAPI } from "../filters.js";
+import { main } from "../main.js";
 
 function checkBranches(repo) {
   repo.hasMaster = false;
@@ -34,7 +40,7 @@ export default {
   title: "Branches",
   check: checkBranches,
   setup(props) {
-    return { props, repoUrl: computed(() => toRepoAPI(props.repo.name)) };
+    return { props, main, repoUrl: computed(() => toRepoAPI(props.repo.name)) };
   },
 };
 </script>

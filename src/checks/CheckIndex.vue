@@ -1,5 +1,9 @@
 <template>
-  <a target="_blank" :href="`${repoUrl}/gh-pages/index.html`">
+  <a
+    target="_blank"
+    :href="`${repoUrl}/gh-pages/index.html`"
+    class="text-nowrap"
+  >
     {{ props.repo.title }}
   </a>
 </template>

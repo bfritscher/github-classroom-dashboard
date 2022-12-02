@@ -1,7 +1,7 @@
 <template>
   <span v-for="u in props.repo.users" :key="u.login"
     >{{ u.name }}
-    <span v-if="!u.name || debug">({{ u.login }})</span>
+    <span v-if="!u.name">({{ u.login }})</span>
     <b>[{{ commitCount(props.repo.commits, u) }}]</b>
   </span>
 </template>

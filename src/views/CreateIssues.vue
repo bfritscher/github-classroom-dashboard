@@ -79,18 +79,21 @@ function handleFileSelect(event) {
 </script>
 
 <template>
-  <input type="file" @change="handleFileSelect" />
-
+  <div class="submenu">
+    <input type="file" @change="handleFileSelect" />
+  </div>
   <div v-if="evalState.evals.length > 0 || evalState.evalsDone.length > 0">
-    <h2>Evaluations {{ evalState.evals.length }}</h2>
+    <h2>Upload Evaluations: {{ evalState.evals.length }}</h2>
     <div
       class="eval"
       v-for="ev in evalState.evals"
       v-html="ev.preview"
       :key="ev.repo"
     ></div>
-    <button @click="createIssue()">Create Issues on GitHUB</button>
-    <p>Done: {{ evalState.evalsDone.length }}</p>
+    <div class="submenu">
+      <button @click="createIssue()">Create Issues on GitHUB</button>
+      <p>Done: {{ evalState.evalsDone.length }}</p>
+    </div>
     <ul>
       <li v-for="done in evalState.evalsDone" :key="done.repo">
         <a :href="done.html_url">{{ done.repo }}</a>
@@ -101,7 +104,11 @@ function handleFileSelect(event) {
 
 <style>
 .eval {
-  border: 1px solid red;
-  margin: 20px;
+  border: 1px solid rgb(243 242 241);
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: rgb(0 0 0 / 10%) 0px 4px 12px;
+  max-width: 800px;
+  margin: 20px auto;
 }
 </style>

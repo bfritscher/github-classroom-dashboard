@@ -17,6 +17,8 @@ export const main = reactive({
       },
     },
   },
+  showDetails: false,
+  showSearch: false,
 });
 main.assignments = JSON.parse(localStorage.getItem("assignments") || "{}");
 main.classroomProjectPrefix = localStorage.getItem("classroomProjectPrefix");
