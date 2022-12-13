@@ -1,5 +1,5 @@
 <template>
-  <div v-for="u in props.repo.users" :key="u.login">
+  <div v-for="u in props.repo.users" :key="u.login" class="text-nowrap">
     <img
       v-if="main.showPic"
       class="profile"
