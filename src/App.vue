@@ -57,20 +57,40 @@ axios.interceptors.request.use((config) => {
 });
 
 axios.interceptors.response.use((response) => {
-  // Do something with response data
   if (response.headers) {
-    main.ghApi.rateLimit.remaining = parseInt(
-      response.headers["x-ratelimit-remaining"],
-      10
-    );
-    main.ghApi.rateLimit.limit = parseInt(
-      response.headers["x-ratelimit-limit"],
-      10
-    );
-    main.ghApi.rateLimit.reset = parseInt(
-      response.headers["x-ratelimit-reset"],
-      10
-    );
+    if (
+      Object.prototype.hasOwnProperty.call(
+        response.headers,
+        "x-ratelimit-remaining"
+      )
+    ) {
+      main.ghApi.rateLimit.remaining = parseInt(
+        response.headers["x-ratelimit-remaining"],
+        10
+      );
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(
+        response.headers,
+        "x-ratelimit-limit"
+      )
+    ) {
+      main.ghApi.rateLimit.limit = parseInt(
+        response.headers["x-ratelimit-limit"],
+        10
+      );
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(
+        response.headers,
+        "x-ratelimit-reset"
+      )
+    ) {
+      main.ghApi.rateLimit.reset = parseInt(
+        response.headers["x-ratelimit-reset"],
+        10
+      );
+    }
   }
   return response;
 });
@@ -141,6 +161,7 @@ a.router-link-exact-active {
   color: #ffffff;
   background: #509ee3;
 }
+
 label {
   cursor: pointer;
 }
@@ -176,9 +197,11 @@ ul {
   padding: 0;
   list-style-type: none;
 }
+
 li {
   white-space: nowrap;
 }
+
 .text-nowrap {
   white-space: nowrap;
 }

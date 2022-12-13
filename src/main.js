@@ -10,9 +10,12 @@ export const main = reactive({
       limit: 0,
       reset: 0,
       resetCoutdown() {
-        return Math.round(
-          (main.ghApi.rateLimit.reset * 1000 - new Date().getTime()) /
-            (60 * 1000)
+        return Math.max(
+          0,
+          Math.round(
+            (main.ghApi.rateLimit.reset * 1000 - new Date().getTime()) /
+              (60 * 1000)
+          )
         );
       },
     },
