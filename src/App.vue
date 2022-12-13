@@ -157,6 +157,11 @@ a {
   color: #509ee3;
 }
 
+nav a:hover {
+  color: #ffffff;
+  background-color: #509ee3;
+}
+
 a.router-link-exact-active {
   color: #ffffff;
   background: #509ee3;

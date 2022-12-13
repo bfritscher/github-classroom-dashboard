@@ -135,7 +135,7 @@ function clear() {
   main.assignments = {};
 }
 
-function refresh() {
+function fetchAndRefresh() {
   if (!main.ghApi.access_token) {
     const access_token = window.prompt("access_token");
     if (!access_token) {
@@ -178,6 +178,24 @@ function refresh() {
   }
   getRepos(1);
 }
+
+function refreshAll() {
+  for (const repo of Object.values(main.assignments)) {
+    refreshAssignment(repo);
+  }
+}
+
+function promptRemove(name) {
+  if (confirm('Are you sure you want to remove "' + name + '"?')) {
+    delete main.assignments[name];
+    saveAssignments();
+  }
+}
+
+function saveAssignments() {
+  localStorage.setItem("assignments", JSON.stringify(main.assignments));
+}
+
 async function refreshAssignment(repo) {
   repo.errors = new WeakMap();
   repo.running = new WeakMap();
@@ -205,7 +223,7 @@ async function refreshCheckComponent(repo, checkComponent) {
     repo.errors.set(checkComponent, e);
   } finally {
     repo.running.set(checkComponent, false);
-    localStorage.setItem("assignments", JSON.stringify(main.assignments));
+    saveAssignments();
   }
 }
 
@@ -234,7 +252,7 @@ function getCommiterIndex(name) {
         @change="saveProjectPrefix()"
         v-model="main.classroomProjectPrefix"
     /></label>
-    <button @click="refresh()">refresh data</button>
+    <button @click="fetchAndRefresh ()">fetch repos</button>
     <span
       >{{ main.ghApi.rateLimit.remaining }} /
       {{ main.ghApi.rateLimit.limit }} reset in
@@ -255,7 +273,7 @@ function getCommiterIndex(name) {
     <table>
       <thead>
         <tr>
-          <th></th>
+          <th @click="refreshAll()">🗘</th>
           <th>Project</th>
           <th
             v-for="(check, index) in assignmentsChecksFiltered"
@@ -271,7 +289,7 @@ function getCommiterIndex(name) {
           <td @click="refreshAssignment(main.assignments[name])">
             {{ index + 1 }}
           </td>
-          <td>{{ name }}</td>
+          <td @dblclick="promptRemove(name)">{{ name }}</td>
           <td
             v-for="(checkComponent, index) in assignmentsChecksFiltered"
             :key="index"
@@ -417,6 +435,12 @@ th {
   border-top: 1px solid #eeecec;
   padding: 0 8px;
   font-size: 13px;
+  cursor: pointer;
+}
+
+th:hover {
+  background-color: #509ee3;
+  color: white;
 }
 
 tbody td {
