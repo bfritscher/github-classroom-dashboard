@@ -15,13 +15,17 @@ function checkGhPagesIsDist(repo) {
       for (let i = 0; i < response.data.length; i++) {
         if (
           response.data[i].name.indexOf("index") === 0 &&
-          response.data[i].name.split(".").length === 3
+          (response.data[i].name.split(".").length === 3 ||
+            response.data[i].name.split("-").length === 2)
         ) {
           repo.ghPagesIsDist = true;
           return;
         }
       }
     });
+}
+function isCorrect(repo) {
+  return repo.ghPagesIsDist;
 }
 
 export default {
@@ -30,8 +34,9 @@ export default {
   },
   title: "GhPagesIsDist",
   check: checkGhPagesIsDist,
-  isCorrect(repo) {
-    return repo.ghPagesIsDist;
+  isCorrect,
+  total(repos) {
+    return repos.filter((repo) => isCorrect(repo)).length;
   },
   setup(props) {
     return {

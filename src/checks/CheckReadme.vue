@@ -14,6 +14,9 @@ function checkReadme(repo) {
     repo.readmeUrl = response.data.html_url;
   });
 }
+function  isCorrect(repo) {
+    return repo.hasReadme;
+  }
 
 export default {
   props: {
@@ -21,8 +24,9 @@ export default {
   },
   title: "Readme",
   check: checkReadme,
-  isCorrect(repo) {
-    return repo.hasReadme;
+  isCorrect,
+  total(repos) {
+    return repos.filter((repo) => isCorrect(repo)).length;
   },
   setup(props) {
     return { props, repoUrl: computed(() => toRepoAPI(props.repo.name)) };

@@ -34,6 +34,9 @@ export default {
         return u;
       });
   },
+  total(repos){
+    return repos.reduce((acc, repo) => acc + repo.users.length, 0);
+  },
   setup(props) {
     return { main, props, githubUsernameLookup, githubUsernameLookupPics };
   },

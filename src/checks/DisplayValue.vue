@@ -6,6 +6,10 @@
 </template>
 <script>
 import ValueOrList from "../components/ValueOrList.vue";
+
+function isCorrect(repo, args) {
+    return typeof repo[args[0]] === "boolean" ? repo[args[0]] : undefined;
+  }
 export default {
   props: {
     repo: Object,
@@ -16,8 +20,9 @@ export default {
   },
   title: "Display",
   check: async () => {},
-  isCorrect(repo, args) {
-    return typeof repo[args[0]] === "boolean" ? repo[args[0]] : undefined;
+  isCorrect,
+  total(repos, args) {
+    return repos.filter((repo) => isCorrect(repo, args)).length;
   },
   setup(props) {
     return { props, isArray: () => Array.isArray(props.repo[props.args[0]]) };

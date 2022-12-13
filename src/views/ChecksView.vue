@@ -126,10 +126,10 @@ function refresh() {
     localStorage.setItem("access_token", main.ghApi.access_token);
   }
 
-  function getRepos(page) {
-    axios
+  async function getRepos(page) {
+    await axios
       .get(`${API}orgs/${GITHUB_ORG}/repos?per_page=100&page=${page}`)
-      .then((response) => {
+      .then(async (response) => {
         response.data
           .filter((repo) => {
             return (
@@ -151,7 +151,7 @@ function refresh() {
         if (response.headers.link) {
           const match = response.headers.link.match(/page=(\d+)>; rel="(.*?)"/);
           if (match[2] === "next") {
-            getRepos(match[1]);
+            await getRepos(match[1]);
           }
         }
       });
@@ -317,12 +317,34 @@ function getCommiterIndex(name) {
           </td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr>
+          <th></th>
+          <th></th>
+          <th
+            v-for="(check, index) in assignmentsChecksFiltered"
+            :key="index"
+            @click="refreshCheckRow(check)"
+          >
+            <span v-if="(check.component || check).total">
+              {{
+                (check.component || check).total(
+                  Object.values(main.assignments),
+                  check.args
+                )
+              }}</span
+            >
+          </th>
+        </tr>
+      </tfoot>
     </table>
   </div>
 
   <div>
     <div
-      v-for="c in main.commits"
+      v-for="c in main.commits.filter(
+        (c) => c.commit.author.name !== 'github-classroom[bot]'
+      )"
       :class="`commit commiter${getCommiterIndex(c.commit.author.name)}`"
       :key="c.sha"
     >

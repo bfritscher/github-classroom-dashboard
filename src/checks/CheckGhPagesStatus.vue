@@ -31,6 +31,9 @@ export default {
   },
   title: "Status",
   check: checkGHPagesStatus,
+  total(repos) {
+    return repos.filter((r) => r.ghPagesStatus == "built").length;
+  },
   setup(props) {
     function enableGHPages() {
       const req = {

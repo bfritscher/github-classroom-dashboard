@@ -26,6 +26,9 @@ function checkRelease(repo, tag) {
     });
   });
 }
+function isCorrect(repo, args) {
+  return repo["isRelease" + args[0]];
+}
 
 export default {
   props: {
@@ -34,8 +37,8 @@ export default {
   },
   title: "Release",
   check: checkRelease,
-  isCorrect(repo, args) {
-    return repo["isRelease" + args[0]];
+  total(repos, args) {
+    return repos.filter((repo) => isCorrect(repo, args)).length;
   },
   setup(props) {
     return { props, repoUrl: computed(() => toRepo(props.repo.name)) };

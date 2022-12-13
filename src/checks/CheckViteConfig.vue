@@ -41,6 +41,9 @@ export default {
   title: "ViteConfig",
   check: checkVite,
   isCorrect,
+  total(repos) {
+    return repos.filter((repo) => isCorrect(repo)).length;
+  },
   setup(props) {
     return {
       props,
