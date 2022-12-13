@@ -50,4 +50,9 @@ export default {
   margin-right: 10px;
   vertical-align: middle;
 }
+.profile:hover {
+  width: 272px;
+  height: 340px;
+  border-radius: 0;
+}
 </style>
