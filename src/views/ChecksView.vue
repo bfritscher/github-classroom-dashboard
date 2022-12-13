@@ -72,6 +72,21 @@ const assignmentsChecks = [
   },
   {
     component: SearchString,
+    title: "$root",
+    args: ["$root", "root"],
+  },
+  {
+    component: SearchString,
+    title: "JSON.parse",
+    args: ["JSON.parse", "jsonP"],
+  },
+  {
+    component: SearchString,
+    title: "JSON.stringify",
+    args: ["JSON.stringify", "jsonS"],
+  },
+  {
+    component: SearchString,
     title: "console.log",
     args: ["console.log", "console"],
   },

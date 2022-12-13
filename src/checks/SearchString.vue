@@ -1,12 +1,16 @@
 <template>
   <div v-if="props.repo.search && props.repo.search[props.args[1]]">
-    {{ props.repo.search[props.args[1]].total_count }}
+    <a
+      :href="`https://github.com/search?q=repo%3A${GITHUB_ORG}%2F${props.repo.name}+%28path%3A*.js+OR+path%3A*.vue+%29+${props.args[0]}&type=code`"
+      target="_blank"
+      >{{ props.repo.search[props.args[1]].total_count }}</a
+    >
     <ul v-if="main.showDetails">
       <li
         v-for="(e, index) in props.repo.search[props.args[1]].items"
         :key="index"
       >
-        <a :href="e.html_url">{{ e.path }}</a>
+        <a :href="e.html_url" target="_blank">{{ e.path }}</a>
       </li>
     </ul>
   </div>
@@ -38,7 +42,7 @@ export default {
   title: "Search",
   check: searchString,
   setup(props) {
-    return { props, main };
+    return { props, main, GITHUB_ORG };
   },
 };
 </script>
