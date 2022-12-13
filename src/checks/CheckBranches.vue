@@ -1,10 +1,8 @@
 <template>
-  <span>
-    {{ props.repo.branches?.length }}
-    <ul v-if="main.showDetails">
-      <li v-for="branch in props.repo.branches" :key="branch">{{ branch }}</li>
-    </ul>
-  </span>
+  <div class="text-right">{{ props.repo.branches?.length }}</div>
+  <ul v-if="main.showDetails">
+    <li v-for="branch in props.repo.branches" :key="branch">{{ branch }}</li>
+  </ul>
 </template>
 <script>
 import axios from "axios";

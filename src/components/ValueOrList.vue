@@ -1,10 +1,10 @@
 <template>
-  <span v-if="isArray">
-    {{ value.length }}
+  <div v-if="isArray">
+    <div class="text-right">{{ value.length }}</div>
     <ul v-if="main.showDetails">
       <li v-for="item in value" :key="item">{{ item }}</li>
     </ul>
-  </span>
+  </div>
   <span v-else>{{ value }}</span>
 </template>
 <script setup>

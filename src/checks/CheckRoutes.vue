@@ -5,7 +5,9 @@
       repo.hasMain ? 'main' : 'master'
     }/src/router/index.js`"
   >
-    <span v-if="props.repo.routes">{{ props.repo.routes.length }}</span>
+    <div v-if="props.repo.routes" class="text-right">
+      {{ props.repo.routes.length }}
+    </div>
     <ul v-if="main.showDetails">
       <li v-for="name in props.repo.routes" :key="name">
         {{ name }}
@@ -19,7 +21,7 @@ import { computed } from "vue";
 import { b64DecodeUnicode, toRepoAPI, toRepo } from "../filters.js";
 import { main } from "../main.js";
 
-const regexRoutePath = /path:.*?["'](.+)["']/g
+const regexRoutePath = /path:.*?["'](.+)["']/g;
 
 function checkRoutes(repo) {
   repo.routes = [];
