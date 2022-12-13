@@ -17,6 +17,7 @@ import SearchString from "../checks/SearchString.vue";
 import CheckDependencies from "../checks/CheckDependencies.vue";
 import CheckViteConfig from "../checks/CheckViteConfig.vue";
 import CheckEslint from "../checks/CheckEslint.vue";
+import CheckRoutes from "../checks/CheckRoutes.vue";
 
 const assignmentsChecks = [
   CheckCollaborators,
@@ -54,6 +55,7 @@ const assignmentsChecks = [
   },
   CheckDependencies,
   CheckEslint,
+  CheckRoutes,
   // search is low because of rate limit add it at the end
   {
     component: SearchString,
