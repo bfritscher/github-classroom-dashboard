@@ -205,4 +205,10 @@ li {
 .text-nowrap {
   white-space: nowrap;
 }
+.text-right {
+  text-align: right;
+}
+.flex {
+  flex: 1;
+}
 </style>

@@ -1,4 +1,5 @@
 <script setup>
+import { computed, reactive } from "vue";
 import axios from "axios";
 import { repoToGhPagesUrl, toRepo } from "../filters.js";
 import { main } from "../main.js";
@@ -15,7 +16,7 @@ import DisplayValue from "../checks/DisplayValue.vue";
 import SearchString from "../checks/SearchString.vue";
 import CheckDependencies from "../checks/CheckDependencies.vue";
 import CheckViteConfig from "../checks/CheckViteConfig.vue";
-import { computed, reactive } from "vue";
+import CheckEslint from "../checks/CheckEslint.vue";
 
 const assignmentsChecks = [
   CheckCollaborators,
@@ -52,6 +53,7 @@ const assignmentsChecks = [
     args: ["style"],
   },
   CheckDependencies,
+  CheckEslint,
   // search is low because of rate limit add it at the end
   {
     component: SearchString,
@@ -133,8 +135,9 @@ function refresh() {
         response.data
           .filter((repo) => {
             return (
-              !USERNAME_BLACKLIST.some((name) => repo.name.includes(name)) &&
-              repo.name.startsWith(main.classroomProjectPrefix)
+              (!USERNAME_BLACKLIST.some((name) => repo.name.includes(name)) &&
+                repo.name.startsWith(main.classroomProjectPrefix)) ||
+              repo.name === main.classroomProjectPrefix
             );
           })
           .forEach((repo) => {
@@ -369,6 +372,11 @@ function getCommiterIndex(name) {
 .wrong,
 .wrong a {
   color: rgb(250, 133, 133);
+}
+
+.warn,
+.warn a {
+  color: rgb(244, 174, 95);
 }
 
 .error {
