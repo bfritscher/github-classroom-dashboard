@@ -6,7 +6,12 @@
       <b>[{{ commitCount(props.repo.commits, u) }}]</b>
     </div>
     <div v-if="main.showDetails">
-      github-classroom[bot] <b>[{{ commitCount(props.repo.commits, {name: 'github-classroom[bot]'}) }}]</b>
+      github-classroom[bot]
+      <b
+        >[{{
+          commitCount(props.repo.commits, { name: "github-classroom[bot]" })
+        }}]</b
+      >
     </div>
     <div v-if="main.showDetails">
       Merge <b>[{{ commitCountMerge(props.repo.commits) }}]</b>
@@ -41,7 +46,8 @@ function commitCount(commits, u) {
   if (commits) {
     return commits.filter((c) => {
       return (
-        (c.commit.author.name === u.login || c.commit.author.name === u.name) &&
+        ((c.author && c.author.login === u.login) ||
+          c.commit.author.name === u.name) &&
         c.commit.message.indexOf("Merge") !== 0
       );
     }).length;

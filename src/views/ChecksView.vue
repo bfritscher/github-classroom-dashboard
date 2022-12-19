@@ -18,19 +18,41 @@ import CheckDependencies from "../checks/CheckDependencies.vue";
 import CheckViteConfig from "../checks/CheckViteConfig.vue";
 import CheckEslint from "../checks/CheckEslint.vue";
 import CheckRoutes from "../checks/CheckRoutes.vue";
+import CommitsChart from "../components/CommitsChart.vue";
+
+import { formatDistanceToNowStrict } from "date-fns";
+import { committer_colors } from "../colors.js";
 
 const assignmentsChecks = [
   CheckCollaborators,
   CheckCommits,
   {
     component: DisplayValue,
+    title: "Last Commit",
+    args: {
+      value: (repo) => {
+        const lastCommit = repo.commits[0];
+        return lastCommit
+          ? formatDistanceToNowStrict(new Date(lastCommit.commit.author.date))
+          : "no commits";
+      },
+    },
+  },
+  {
+    component: DisplayValue,
     title: "Main",
-    args: ["hasMain", (repo) => `${toRepo(repo.name)}/tree/main`],
+    args: {
+      value: "hasMain",
+      href: (repo) => `${toRepo(repo.name)}/tree/main`,
+    },
   },
   {
     component: DisplayValue,
     title: "GhPages",
-    args: ["hasGhPages", (repo) => `${toRepo(repo.name)}/tree/gh-pages`],
+    args: {
+      value: "hasGhPages",
+      href: (repo) => `${toRepo(repo.name)}/tree/gh-pages`,
+    },
   },
   CheckGhPagesStatus,
   CheckGhPagesIsDist,
@@ -46,12 +68,14 @@ const assignmentsChecks = [
   {
     component: DisplayValue,
     title: "Tags",
-    args: ["releases"],
+    args: {
+      value: "releases",
+    },
   },
   {
     component: DisplayValue,
     title: "Style",
-    args: ["style"],
+    args: { value: "style" },
   },
   CheckDependencies,
   CheckEslint,
@@ -252,7 +276,7 @@ function getCommiterIndex(name) {
         @change="saveProjectPrefix()"
         v-model="main.classroomProjectPrefix"
     /></label>
-    <button @click="fetchAndRefresh ()">fetch repos</button>
+    <button @click="fetchAndRefresh()">fetch repos</button>
     <span
       >{{ main.ghApi.rateLimit.remaining }} /
       {{ main.ghApi.rateLimit.limit }} reset in
@@ -377,23 +401,33 @@ function getCommiterIndex(name) {
       </tfoot>
     </table>
   </div>
-
-  <div>
-    <div
-      v-for="c in main.commits.filter(
-        (c) => c.commit.author.name !== 'github-classroom[bot]'
-      )"
-      :class="`commit commiter${getCommiterIndex(c.commit.author.name)}`"
-      :key="c.sha"
-    >
-      <i>{{ c.commit.author.name }}</i>
-      {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
-      <a
-        target="_blank"
-        :href="c.html_url"
-        :class="{ merge: c.commit.message.indexOf('Merge') == 0 }"
-        >{{ c.commit.message }}</a
+  <div v-if="main.commits.length > 0" class="row">
+    <div class="col-6">
+      <div
+        v-for="c in main.commits.filter(
+          (c) => c.commit.author.name !== 'github-classroom[bot]'
+        )"
+        class="`commit"
+        :style="{
+          backgroundColor:
+            committer_colors[getCommiterIndex(c.commit.author.name)],
+        }"
+        :key="c.sha"
       >
+        <i>{{ c.commit.author.name }}</i>
+        {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
+        <a
+          target="_blank"
+          :href="c.html_url"
+          :class="{ merge: c.commit.message.indexOf('Merge') == 0 }"
+          >{{ c.commit.message }}</a
+        >
+      </div>
+    </div>
+    <div class="col-6 pa-3">
+      <div>
+        <commits-chart :commits="main.commits" />
+      </div>
     </div>
   </div>
 </template>
@@ -450,14 +484,6 @@ tbody td {
 .commit {
   padding: 2px;
 }
-.commiter0 {
-  background-color: #b2e7ff;
-}
-
-.commiter1 {
-  background-color: #d1c8e3;
-}
-
 .merge {
   background-color: rgb(237, 201, 135);
 }

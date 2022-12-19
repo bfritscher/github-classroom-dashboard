@@ -216,4 +216,13 @@ li {
 .flex {
   flex: 1;
 }
+.row {
+  display: flex;
+}
+.col-6 {
+  width: 50%;
+}
+.pa-3 {
+  margin: 2rem;
+}
 </style>

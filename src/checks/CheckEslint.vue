@@ -5,7 +5,6 @@
         props.repo.eslint &&
         (props.repo.eslint.warnings >= 0 || props.repo.eslint.errors >= 0)
       "
-      class="row"
     >
       <div
         class="subrow"
@@ -17,10 +16,13 @@
         <span>w:</span>
         <span class="flex text-right">{{ props.repo.eslint.warnings }}</span>
       </div>
-      <div class="subrow" :class="{
+      <div
+        class="subrow"
+        :class="{
           wrong: props.repo.eslint.errors > 0,
           correct: props.repo.eslint.errors === 0,
-        }">
+        }"
+      >
         <span>e:</span>
         <span class="flex text-right">{{ props.repo.eslint.errors }}</span>
       </div>

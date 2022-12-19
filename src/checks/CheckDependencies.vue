@@ -3,9 +3,9 @@
     target="_blank"
     :href="`${repoUrl}/blob/${repo.hasMain ? 'main' : 'master'}/package.json`"
   >
-    <div v-if="props.repo.dependencies" class="text-right">{{
-      Object.keys(props.repo.dependencies).length
-    }}</div>
+    <div v-if="props.repo.dependencies" class="text-right">
+      {{ Object.keys(props.repo.dependencies).length }}
+    </div>
     <ul v-if="main.showDetails">
       <li v-for="(version, name) in props.repo.dependencies" :key="name">
         {{ name }}: {{ version }}

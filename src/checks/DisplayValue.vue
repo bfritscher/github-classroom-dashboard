@@ -1,19 +1,32 @@
 <template>
-  <a v-if="props.args[1]" :href="props.args[1](props.repo)" target="_blank">
-    <value-or-list :value="props.repo[props.args[0]]" />
+  <a v-if="props.args.href" :href="props.args.href(props.repo)" target="_blank">
+    <value-or-list :value="value" />
   </a>
-  <value-or-list v-else :value="props.repo[props.args[0]]" />
+  <value-or-list v-else :value="value" />
 </template>
 <script>
 import ValueOrList from "../components/ValueOrList.vue";
+import { computed } from "vue";
+
+function getValue(repo, args) {
+  if (typeof args.value === "function") {
+    try {
+      return args.value(repo);
+    } catch (e) {
+      return "error";
+    }
+  }
+  return repo[args.value];
+}
 
 function isCorrect(repo, args) {
-    return typeof repo[args[0]] === "boolean" ? repo[args[0]] : undefined;
-  }
+  const value = getValue(repo, args);
+  return typeof value === "boolean" ? value : undefined;
+}
 export default {
   props: {
     repo: Object,
-    args: Array,
+    args: Object,
   },
   components: {
     ValueOrList,
@@ -22,10 +35,22 @@ export default {
   check: async () => {},
   isCorrect,
   total(repos, args) {
-    return repos.filter((repo) => isCorrect(repo, args)).length;
+    let total = 0;
+    let seen_bool = false;
+    for (const repo of repos) {
+      const correct = isCorrect(repo, args);
+      if (typeof correct === "boolean") {
+        seen_bool = true;
+        total += correct ? 1 : 0;
+      }
+    }
+    return seen_bool ? total : "";
   },
   setup(props) {
-    return { props, isArray: () => Array.isArray(props.repo[props.args[0]]) };
+    const value = computed(() => {
+      return getValue(props.repo, props.args);
+    });
+    return { props, value };
   },
 };
 </script>
