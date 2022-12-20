@@ -239,11 +239,16 @@ async function refreshCheckComponent(repo, checkComponent) {
   repo.errors.delete(checkComponent);
   try {
     if (checkComponent.component) {
-      await checkComponent.component.check(repo, ...checkComponent.args);
+      if (Array.isArray(checkComponent.component.args)) {
+        await checkComponent.component.check(repo, ...checkComponent.args);
+      } else {
+        await checkComponent.component.check(repo, checkComponent.args);
+      }
     } else {
       await checkComponent.check(repo);
     }
   } catch (e) {
+    console.log(e);
     repo.errors.set(checkComponent, e);
   } finally {
     repo.running.set(checkComponent, false);

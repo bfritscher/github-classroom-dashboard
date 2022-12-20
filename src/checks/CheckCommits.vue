@@ -73,6 +73,9 @@ export default {
   total(repos) {
     const stats = repos.reduce(
       (stats, repo) => {
+        if (!repo.commits) {
+          return stats;
+        }
         const commitsCount = repo.commits.filter((c) => {
           return (
             c.commit.message.indexOf("Merge") !== 0 &&
