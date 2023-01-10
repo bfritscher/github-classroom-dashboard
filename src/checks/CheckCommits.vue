@@ -5,6 +5,10 @@
       <span v-if="!u.name">({{ u.login }})</span>
       <b>[{{ commitCount(props.repo.commits, u) }}]</b>
     </div>
+    <div v-for="u in missingCommits" :key="u" class="text-nowrap">
+      {{ u }}
+      <b>[{{ commitsCounted[u] }}]</b>
+    </div>
     <div v-if="main.showDetails">
       github-classroom[bot]
       <b
@@ -19,6 +23,7 @@
   </div>
 </template>
 <script>
+import { computed } from "vue";
 import axios from "axios";
 import { toRepoAPI } from "../filters.js";
 import { main } from "../main.js";
@@ -47,7 +52,8 @@ function commitCount(commits, u) {
     return commits.filter((c) => {
       return (
         ((c.author && c.author.login === u.login) ||
-          c.commit.author.name === u.name) &&
+          c.commit.author.name === u.name ||
+          c.commit.author.name === u.login) &&
         c.commit.message.indexOf("Merge") !== 0
       );
     }).length;
@@ -100,9 +106,33 @@ export default {
     )})`;
   },
   setup(props) {
+    const commitsCounted = computed(() => {
+      const agg = props.repo?.commits
+        .filter((c) => c.commit.message.indexOf("Merge") !== 0)
+        .reduce((agg, commit) => {
+          if (!Object.hasOwnProperty.call(agg, commit.commit.author.name)) {
+            agg[commit.commit.author.name] = 0;
+          }
+          agg[commit.commit.author.name] += 1;
+          return agg;
+        }, {});
+      return agg;
+    });
+    const missingCommits = computed(() => {
+      return Object.keys(commitsCounted.value).filter(
+        (key) =>
+          !props.repo.users
+            .map((u) => u.login)
+            .concat(["github-classroom[bot]"])
+            .includes(key)
+      );
+    });
+
     return {
       props,
       commitCount,
+      commitsCounted,
+      missingCommits,
       commitCountMerge,
       main,
       showCommits() {
