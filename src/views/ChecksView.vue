@@ -80,6 +80,15 @@ const assignmentsChecks = [
   CheckDependencies,
   CheckEslint,
   CheckRoutes,
+  {
+    component: DisplayValue,
+    title: "Route Params",
+    args: {
+      value: (repo) => {
+        return repo.routes?.filter((r) => r.includes(":"));
+      },
+    },
+  },
   // search is low because of rate limit add it at the end
   {
     component: SearchString,
