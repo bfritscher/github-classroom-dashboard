@@ -12,6 +12,7 @@ import CheckRelease from "../checks/CheckRelease.vue";
 import CheckGhPagesStatus from "../checks/CheckGhPagesStatus.vue";
 import CheckReadme from "../checks/CheckReadme.vue";
 import CheckIndex from "../checks/CheckIndex.vue";
+import CheckFavIcon from "../checks/CheckFavIcon.vue";
 import DisplayValue from "../checks/DisplayValue.vue";
 import SearchString from "../checks/SearchString.vue";
 import CheckDependencies from "../checks/CheckDependencies.vue";
@@ -64,6 +65,7 @@ const assignmentsChecks = [
     args: ["2.0.0"],
   },
   CheckIndex,
+  CheckFavIcon,
   CheckBranches,
   {
     component: DisplayValue,
