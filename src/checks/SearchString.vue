@@ -25,9 +25,14 @@ function searchString(repo, query, key) {
     repo.search = {};
   }
   repo.search[key] = { total_count: -1, items: [] };
-  const searchTxt = `${query}+in:file+extension:js+extension:vue+repo:${GITHUB_ORG}/${repo.name}`;
+  const searchTxt = `${query} in:file extension:js extension:vue repo:${GITHUB_ORG}/${repo.name}`;
+  //const searchTxt = `addClass in:file+language:js+repo:jquery/jquery`;
   return axios
-    .get(`${API}search/code?q=${encodeURIComponent(searchTxt)}`)
+    .get(`${API}search/code?q=${searchTxt}`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+      },
+    })
     .then((response) => {
       repo.search[key] = response.data;
     });
