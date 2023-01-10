@@ -25,10 +25,9 @@ function searchString(repo, query, key) {
     repo.search = {};
   }
   repo.search[key] = { total_count: -1, items: [] };
+  const searchTxt = `${query}+in:file+extension:js+extension:vue+repo:${GITHUB_ORG}/${repo.name}`;
   return axios
-    .get(
-      `${API}search/code?q=${query}+in:file+extension:js+extension:vue+repo:${GITHUB_ORG}/${repo.name}`
-    )
+    .get(`${API}search/code?q=${encodeURIComponent(searchTxt)}`)
     .then((response) => {
       repo.search[key] = response.data;
     });

@@ -239,7 +239,7 @@ async function refreshCheckComponent(repo, checkComponent) {
   repo.errors.delete(checkComponent);
   try {
     if (checkComponent.component) {
-      if (Array.isArray(checkComponent.component.args)) {
+      if (Array.isArray(checkComponent.args)) {
         await checkComponent.component.check(repo, ...checkComponent.args);
       } else {
         await checkComponent.component.check(repo, checkComponent.args);
