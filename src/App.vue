@@ -213,6 +213,10 @@ li {
 .text-right {
   text-align: right;
 }
+.text-center {
+  text-align: center;
+}
+
 .flex {
   flex: 1;
 }

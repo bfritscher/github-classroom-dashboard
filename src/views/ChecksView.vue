@@ -303,13 +303,14 @@ function getCommiterIndex(name) {
     <label><input type="checkbox" v-model="main.showDetails" /> Details</label>
     <label><input type="checkbox" v-model="main.showSearch" /> Search</label>
     <label><input type="checkbox" v-model="main.showPic" /> Pic</label>
+    <label><input type="checkbox" v-model="main.showCards" /> Cards View</label>
     <span class="spacer"></span>
     <a :href="getUrls()" download="urls.txt">download urls.txt</a>
     <button @click="clear()">clear</button>
   </div>
 
   <h2>Checks</h2>
-  <div class="overflow">
+  <div class="overflow" v-if="!main.showCards">
     <table>
       <thead>
         <tr>
@@ -399,11 +400,7 @@ function getCommiterIndex(name) {
         <tr>
           <th></th>
           <th></th>
-          <th
-            v-for="(check, index) in assignmentsChecksFiltered"
-            :key="index"
-            @click="refreshCheckRow(check)"
-          >
+          <th v-for="(check, index) in assignmentsChecksFiltered" :key="index">
             <span v-if="(check.component || check).total">
               {{
                 (check.component || check).total(
@@ -416,6 +413,81 @@ function getCommiterIndex(name) {
         </tr>
       </tfoot>
     </table>
+  </div>
+  <div v-if="main.showCards">
+    <div v-for="(name, index) in sortedAssignments" :key="name" class="card">
+      <h2 @click="refreshAssignment(main.assignments[name])">
+        {{ name }} #{{ index + 1 }}
+      </h2>
+      <div
+        v-for="(checkComponent, index) in assignmentsChecksFiltered"
+        :key="index"
+        @dblclick="
+          refreshCheckComponent(main.assignments[name], checkComponent)
+        "
+        class="row"
+      >
+        <div class="label">{{ checkComponent.title }}</div>
+        <div
+          :class="`content ${
+            (checkComponent.component
+              ? checkComponent.component
+              : checkComponent
+            ).isCorrect
+              ? (checkComponent.component
+                  ? checkComponent.component
+                  : checkComponent
+                ).isCorrect(main.assignments[name], checkComponent.args)
+                ? 'correct'
+                : (checkComponent.component
+                    ? checkComponent.component
+                    : checkComponent
+                  ).isCorrect(main.assignments[name], checkComponent.args) ===
+                  undefined
+                ? ''
+                : 'wrong'
+              : ''
+          } ${
+            main.assignments[name].errors &&
+            main.assignments[name].errors.constructor.name === 'WeakMap' &&
+            main.assignments[name].errors.has(checkComponent)
+              ? 'error'
+              : ''
+          }
+
+                      ${
+                        main.assignments[name].running &&
+                        main.assignments[name].running.constructor.name ===
+                          'WeakMap' &&
+                        main.assignments[name].running.has(checkComponent)
+                          ? main.assignments[name].running.get(checkComponent)
+                            ? 'running'
+                            : 'done'
+                          : ''
+                      }`"
+        >
+          <component
+            v-if="checkComponent.args"
+            :is="
+              checkComponent.component
+                ? checkComponent.component
+                : checkComponent
+            "
+            :repo="main.assignments[name]"
+            :args="checkComponent.args"
+          />
+          <component
+            v-else
+            :is="
+              checkComponent.component
+                ? checkComponent.component
+                : checkComponent
+            "
+            :repo="main.assignments[name]"
+          />
+        </div>
+      </div>
+    </div>
   </div>
   <div v-if="main.commits.length > 0" class="row">
     <div class="col-6">
@@ -502,5 +574,37 @@ tbody td {
 }
 .merge {
   background-color: rgb(237, 201, 135);
+}
+
+.card {
+  border: 1px solid rgb(243 242 241);
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: rgb(0 0 0 / 10%) 0px 4px 12px;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.card h2 {
+  padding-bottom: 16px;
+}
+
+.card .row {
+  padding: 4px 0;
+}
+
+.card .row:hover {
+  background-color: #ffffcc;
+}
+
+.card .label {
+  width: 150px;
+  font-weight: bold;
+}
+.card .content * {
+  text-align: left !important;
+}
+.card .content ul {
+  margin-left: 1em;
 }
 </style>
