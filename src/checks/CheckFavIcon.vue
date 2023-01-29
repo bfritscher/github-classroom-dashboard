@@ -19,11 +19,15 @@ function checkIndex(repo) {
   return axios
     .get(`${toRepoAPI(repo.name)}/contents/index.html?ref=gh-pages`)
     .then((response) => {
-      const refexFavicon = /rel=".*?icon" href="(.*?)"/gm;
+      const refexFavicon = /rel=".*?icon".*?href="(.*?)"/gm;
       const html = b64DecodeUnicode(response.data.content);
       let match = refexFavicon.exec(html);
       if (match) {
-        repo.favicon = `https://${GITHUB_ORG}.github.io/${match[1]}`;
+        if (match[1].startsWith("data:")) {
+          repo.favicon = match[1];
+        } else {
+          repo.favicon = `https://${GITHUB_ORG}.github.io/${match[1]}`;
+        }
       } else {
         repo.favicon = false;
       }
