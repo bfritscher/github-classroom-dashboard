@@ -1,12 +1,14 @@
 <template>
-  <a
-    target="_blank"
-    :href="`${repoUrl}/blob/gh-pages/index.html`"
-    class="text-nowrap favicon"
-  >
-    <img v-if="props.repo.favicon" :src="props.repo.favicon" />
-    <span v-else>false</span>
-  </a>
+  <div class="text-center">
+    <a
+      target="_blank"
+      :href="`${repoUrl}/blob/gh-pages/index.html`"
+      class="text-nowrap favicon"
+    >
+      <img v-if="props.repo.favicon" :src="props.repo.favicon" />
+      <span v-else>false</span>
+    </a>
+  </div>
 </template>
 <script>
 import axios from "axios";
@@ -51,10 +53,8 @@ export default {
 </script>
 
 <style>
-.favicon {
-  width: ;
-}
 .favicon img {
   width: 100%;
+  max-width: 28px;
 }
 </style>
