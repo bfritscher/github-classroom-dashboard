@@ -107,15 +107,16 @@ export default {
   },
   setup(props) {
     const commitsCounted = computed(() => {
-      const agg = props.repo?.commits
-        .filter((c) => c.commit.message.indexOf("Merge") !== 0)
-        .reduce((agg, commit) => {
-          if (!Object.hasOwnProperty.call(agg, commit.commit.author.name)) {
-            agg[commit.commit.author.name] = 0;
-          }
-          agg[commit.commit.author.name] += 1;
-          return agg;
-        }, {});
+      const agg =
+        props.repo?.commits
+          ?.filter((c) => c.commit.message.indexOf("Merge") !== 0)
+          ?.reduce((agg, commit) => {
+            if (!Object.hasOwnProperty.call(agg, commit.commit.author.name)) {
+              agg[commit.commit.author.name] = 0;
+            }
+            agg[commit.commit.author.name] += 1;
+            return agg;
+          }, {}) || {};
       return agg;
     });
     const missingCommits = computed(() => {
