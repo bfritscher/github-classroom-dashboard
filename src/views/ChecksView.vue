@@ -11,6 +11,7 @@ import CheckGhPagesIsDist from "../checks/CheckGhPagesIsDist.vue";
 import CheckRelease from "../checks/CheckRelease.vue";
 import CheckGhPagesStatus from "../checks/CheckGhPagesStatus.vue";
 import CheckReadme from "../checks/CheckReadme.vue";
+import CheckReadmeMembers from "../checks/CheckReadmeMembers.vue";
 import CheckIndex from "../checks/CheckIndex.vue";
 import CheckFavIcon from "../checks/CheckFavIcon.vue";
 import DisplayValue from "../checks/DisplayValue.vue";
@@ -39,99 +40,7 @@ const assignmentsChecks = [
       },
     },
   },
-  {
-    component: DisplayValue,
-    title: "Main",
-    args: {
-      value: "hasMain",
-      href: (repo) => `${toRepo(repo.name)}/tree/main`,
-    },
-  },
-  {
-    component: DisplayValue,
-    title: "GhPages",
-    args: {
-      value: "hasGhPages",
-      href: (repo) => `${toRepo(repo.name)}/tree/gh-pages`,
-    },
-  },
-  CheckGhPagesStatus,
-  CheckGhPagesIsDist,
-  CheckViteConfig,
-  CheckReadme,
-  {
-    component: CheckRelease,
-    title: "Release 2.0.0",
-    args: ["2.0.0"],
-  },
-  CheckIndex,
-  CheckFavIcon,
-  CheckBranches,
-  {
-    component: DisplayValue,
-    title: "Tags",
-    args: {
-      value: "releases",
-    },
-  },
-  {
-    component: DisplayValue,
-    title: "Style",
-    args: { value: "style" },
-  },
-  CheckDependencies,
-  CheckEslint,
-  CheckRoutes,
-  {
-    component: DisplayValue,
-    title: "Route Params",
-    args: {
-      value: (repo) => {
-        return repo.routes?.filter((r) => r.includes(":"));
-      },
-    },
-  },
-  // search is low because of rate limit add it at the end
-  {
-    component: SearchString,
-    title: "axios",
-    args: ["axios", "axios"],
-  },
-  {
-    component: SearchString,
-    title: "props",
-    args: ["props", "props"],
-  },
-  {
-    component: SearchString,
-    title: "$emit",
-    args: ["$emit", "emit"],
-  },
-  {
-    component: SearchString,
-    title: "$root",
-    args: ["$root", "root"],
-  },
-  {
-    component: SearchString,
-    title: "JSON.parse",
-    args: ["JSON.parse", "jsonP"],
-  },
-  {
-    component: SearchString,
-    title: "JSON.stringify",
-    args: ["JSON.stringify", "jsonS"],
-  },
-  {
-    component: SearchString,
-    title: "console.log",
-    args: ["console.log", "console"],
-  },
-  {
-    component: SearchString,
-    title: "localStorage",
-    args: ["localStorage", "localStorage"],
-  },
+  CheckReadmeMembers,
 ];
 
 const assignmentsChecksFiltered = computed(() => {
