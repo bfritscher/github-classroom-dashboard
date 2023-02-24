@@ -114,7 +114,7 @@ axios.interceptors.response.use((response) => {
   </header>
 
   <div v-if="showAuthInfo">
-    <textarea :model-value="loginPostCurl"></textarea>
+    <textarea>{{ loginPostCurl }}</textarea>
   </div>
 
   <main>
