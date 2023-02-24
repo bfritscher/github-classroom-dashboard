@@ -12,6 +12,7 @@ import CheckRelease from "../checks/CheckRelease.vue";
 import CheckGhPagesStatus from "../checks/CheckGhPagesStatus.vue";
 import CheckReadme from "../checks/CheckReadme.vue";
 import CheckReadmeMembers from "../checks/CheckReadmeMembers.vue";
+import CheckReadmeImages from "../checks/CheckReadmeImages.vue";
 import CheckIndex from "../checks/CheckIndex.vue";
 import CheckFavIcon from "../checks/CheckFavIcon.vue";
 import DisplayValue from "../checks/DisplayValue.vue";
@@ -41,6 +42,7 @@ const assignmentsChecks = [
     },
   },
   CheckReadmeMembers,
+  CheckReadmeImages,
 ];
 
 const assignmentsChecksFiltered = computed(() => {
