@@ -3,7 +3,7 @@
     target="_blank"
     :href="props.repo.readmeUrl"
     v-if="props.repo.readmeImages"
-    >{{ props.repo.readmeImages.length }}</a
+    >{{ props.repo.readmeImages?.length }}</a
   >
 </template>
 <script>
@@ -31,7 +31,7 @@ function checkReadme(repo) {
 }
 
 function isCorrect(repo) {
-  return repo.readmeImages.length > 0;
+  return repo.readmeImages?.length > 0;
 }
 
 export default {
