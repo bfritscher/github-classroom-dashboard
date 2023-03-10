@@ -103,6 +103,7 @@ axios.interceptors.response.use((response) => {
       <router-link to="/">Checks</router-link>
       <router-link to="/preview">Preview</router-link>
       <router-link to="/evals">Uploads</router-link>
+      <router-link to="/chart">Chart</router-link>
       <span class="spacer"></span>
       <a
         v-if="!main.ghApi.access_token"

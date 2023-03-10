@@ -104,7 +104,7 @@ function fetchAndRefresh() {
             );
           })
           .forEach((repo) => {
-            let r = reactive({ name: repo.name });
+            let r = reactive({ name: repo.name, created_at: repo.created_at });
             if (
               Object.prototype.hasOwnProperty.call(main.assignments, repo.name)
             ) {

@@ -6,4 +6,6 @@ export const USERNAME_BLACKLIST = [
   "rolfgeneve",
   "JeromeHumbert",
   "Cotting",
+  "solution",
+  "template",
 ];
