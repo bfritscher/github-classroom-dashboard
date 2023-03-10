@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import ChecksView from "../views/ChecksView.vue";
 import CreateIssues from "../views/CreateIssues.vue";
 import PreviewView from "../views/PreviewView.vue";
+import RepoCreationChart from "../components/RepoCreationChart.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: "/evals",
       name: "evals",
       component: CreateIssues,
+    },
+    {
+      path: "/chart",
+      name: "chart",
+      component: RepoCreationChart,
     },
   ],
 });
