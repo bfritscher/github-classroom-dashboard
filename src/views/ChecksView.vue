@@ -1,9 +1,10 @@
 <script setup>
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import axios from "axios";
-import { repoToGhPagesUrl, toRepo } from "../filters.js";
+import { repoToGhPagesUrl } from "../filters.js";
 import { main } from "../main.js";
 import { API, GITHUB_ORG, USERNAME_BLACKLIST } from "../config.js";
+import { githubUsernameLookup } from "../api.js";
 import CheckCollaborators from "../checks/CheckCollaborators.vue";
 import CheckCommits from "../checks/CheckCommits.vue";
 import CheckBranches from "../checks/CheckBranches.vue";
@@ -45,6 +46,8 @@ const assignmentsChecks = [
   CheckReadmeImages,
 ];
 
+const search = ref("");
+
 const assignmentsChecksFiltered = computed(() => {
   return assignmentsChecks.filter((c) => {
     if (c.component === SearchString) {
@@ -55,11 +58,21 @@ const assignmentsChecksFiltered = computed(() => {
 });
 
 const sortedAssignments = computed(() => {
-  return Object.keys(main.assignments).sort((a, b) => {
-    const repoA = main.assignments[a];
-    const repoB = main.assignments[b];
-    return repoA.name.localeCompare(repoB.name);
-  });
+  return Object.keys(main.assignments)
+    .filter((a) => {
+      const repoA = main.assignments[a];
+      return (
+        repoA.name.includes(search.value) ||
+        repoA.users.some((u) =>
+          githubUsernameLookup[u.login].includes(search.value)
+        )
+      );
+    })
+    .sort((a, b) => {
+      const repoA = main.assignments[a];
+      const repoB = main.assignments[b];
+      return repoA.name.localeCompare(repoB.name);
+    });
 });
 
 function getUrls() {
@@ -220,7 +233,7 @@ function getCommiterIndex(name) {
     <button @click="clear()">clear</button>
   </div>
 
-  <h2>Checks</h2>
+  <h2>Checks <input v-model="search" /></h2>
   <div class="overflow" v-if="!main.showCards">
     <table>
       <thead>
@@ -271,16 +284,30 @@ function getCommiterIndex(name) {
                 : ''
             }
 
-                      ${
-                        main.assignments[name].running &&
-                        main.assignments[name].running.constructor.name ===
-                          'WeakMap' &&
-                        main.assignments[name].running.has(checkComponent)
-                          ? main.assignments[name].running.get(checkComponent)
-                            ? 'running'
-                            : 'done'
-                          : ''
-                      }`"
+                                                          ${
+                                                            main.assignments[
+                                                              name
+                                                            ].running &&
+                                                            main.assignments[
+                                                              name
+                                                            ].running
+                                                              .constructor
+                                                              .name ===
+                                                              'WeakMap' &&
+                                                            main.assignments[
+                                                              name
+                                                            ].running.has(
+                                                              checkComponent
+                                                            )
+                                                              ? main.assignments[
+                                                                  name
+                                                                ].running.get(
+                                                                  checkComponent
+                                                                )
+                                                                ? 'running'
+                                                                : 'done'
+                                                              : ''
+                                                          }`"
             @dblclick="
               refreshCheckComponent(main.assignments[name], checkComponent)
             "
@@ -366,16 +393,26 @@ function getCommiterIndex(name) {
               : ''
           }
 
-                      ${
-                        main.assignments[name].running &&
-                        main.assignments[name].running.constructor.name ===
-                          'WeakMap' &&
-                        main.assignments[name].running.has(checkComponent)
-                          ? main.assignments[name].running.get(checkComponent)
-                            ? 'running'
-                            : 'done'
-                          : ''
-                      }`"
+                                                    ${
+                                                      main.assignments[name]
+                                                        .running &&
+                                                      main.assignments[name]
+                                                        .running.constructor
+                                                        .name === 'WeakMap' &&
+                                                      main.assignments[
+                                                        name
+                                                      ].running.has(
+                                                        checkComponent
+                                                      )
+                                                        ? main.assignments[
+                                                            name
+                                                          ].running.get(
+                                                            checkComponent
+                                                          )
+                                                          ? 'running'
+                                                          : 'done'
+                                                        : ''
+                                                    }`"
         >
           <component
             v-if="checkComponent.args"
@@ -480,9 +517,11 @@ tbody td {
   border: 1px solid #eeecec;
   padding: 0 8px;
 }
+
 .commit {
   padding: 2px;
 }
+
 .merge {
   background-color: rgb(237, 201, 135);
 }
@@ -512,9 +551,11 @@ tbody td {
   width: 150px;
   font-weight: bold;
 }
+
 .card .content * {
   text-align: left !important;
 }
+
 .card .content ul {
   margin-left: 1em;
 }
