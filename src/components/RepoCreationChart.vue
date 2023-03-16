@@ -30,7 +30,10 @@ import { githubUsernameLookup } from "../api.js";
 import { school_domain_colors } from "../colors.js";
 
 function extractDomain(email) {
-  return email.split("@")[1];
+  if (email) {
+    return email.split("@")[1];
+  }
+  return "unknown";
 }
 
 export default {
