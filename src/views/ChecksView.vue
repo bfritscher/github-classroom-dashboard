@@ -63,9 +63,13 @@ const sortedAssignments = computed(() => {
       const repoA = main.assignments[a];
       return (
         repoA.name.includes(search.value) ||
-        repoA.users.some((u) =>
-          githubUsernameLookup[u.login].includes(search.value)
-        )
+        repoA.users.some((u) => {
+          if (!githubUsernameLookup[u.login]) {
+            console.log("no name for", u.login);
+            return true;
+          }
+          return githubUsernameLookup[u.login].includes(search.value);
+        })
       );
     })
     .sort((a, b) => {
