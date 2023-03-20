@@ -173,7 +173,7 @@ export default {
                       this.sortedAssignments.length - 1
                     ].created_at
                   )
-                : new Date(),
+                : new Date().setHours(new Date().getHours() + 2),
           },
           y: {
             title: {
@@ -181,7 +181,7 @@ export default {
               text: "Percentage of total students",
             },
             min: 0,
-            max: 100,
+            max: 110,
           },
         },
       };
