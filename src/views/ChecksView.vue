@@ -42,8 +42,8 @@ const assignmentsChecks = [
       },
     },
   },
-  CheckReadmeMembers,
-  CheckReadmeImages,
+  //CheckReadmeMembers,
+  //CheckReadmeImages,
 ];
 
 const search = ref("");
@@ -132,8 +132,8 @@ function fetchAndRefresh() {
             refreshAssignment(r);
           });
         if (response.headers.link) {
-          const match = response.headers.link.match(/page=(\d+)>; rel="(.*?)"/);
-          if (match[2] === "next") {
+          const match = response.headers.link.match(/page=(\d+)>; rel="next"/);
+          if (match) {
             await getRepos(match[1]);
           }
         }
