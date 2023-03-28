@@ -26,6 +26,7 @@ import CommitsChart from "../components/CommitsChart.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
+import CheckEvents from "../checks/CheckEvents.vue";
 
 const assignmentsChecks = [
   CheckCollaborators,
@@ -42,8 +43,9 @@ const assignmentsChecks = [
       },
     },
   },
+  CheckEvents,
   //CheckReadmeMembers,
-  //CheckReadmeImages,
+  CheckReadmeImages,
 ];
 
 const search = ref("");
@@ -211,18 +213,11 @@ function getCommiterIndex(name) {
 
 <template>
   <div class="submenu">
-    <label
-      >Prefix:
-      <input
-        style="width: 60px"
-        type="text"
-        placeholder="prefix"
-        @change="saveProjectPrefix()"
-        v-model="main.classroomProjectPrefix"
-    /></label>
+    <label>Prefix:
+      <input style="width: 60px" type="text" placeholder="prefix" @change="saveProjectPrefix()"
+        v-model="main.classroomProjectPrefix" /></label>
     <button @click="fetchAndRefresh()">fetch repos</button>
-    <span
-      >{{ main.ghApi.rateLimit.remaining }} /
+    <span>{{ main.ghApi.rateLimit.remaining }} /
       {{ main.ghApi.rateLimit.limit }} reset in
       {{ main.ghApi.rateLimit.resetCoutdown() }} min
       {{ main.ghApi.rateLimitQueue.length }} in queue
@@ -244,11 +239,7 @@ function getCommiterIndex(name) {
         <tr>
           <th @click="refreshAll()">🗘</th>
           <th>Project</th>
-          <th
-            v-for="(check, index) in assignmentsChecksFiltered"
-            :key="index"
-            @click="refreshCheckRow(check)"
-          >
+          <th v-for="(check, index) in assignmentsChecksFiltered" :key="index" @click="refreshCheckRow(check)">
             {{ check.title }}
           </th>
         </tr>
@@ -259,82 +250,65 @@ function getCommiterIndex(name) {
             {{ index + 1 }}
           </td>
           <td @dblclick="promptRemove(name)">{{ name }}</td>
-          <td
-            v-for="(checkComponent, index) in assignmentsChecksFiltered"
-            :key="index"
-            :class="`${
-              (checkComponent.component
+          <td v-for="(checkComponent, index) in assignmentsChecksFiltered" :key="index" :class="`${(checkComponent.component
+              ? checkComponent.component
+              : checkComponent
+            ).isCorrect
+              ? (checkComponent.component
                 ? checkComponent.component
                 : checkComponent
-              ).isCorrect
-                ? (checkComponent.component
-                    ? checkComponent.component
-                    : checkComponent
-                  ).isCorrect(main.assignments[name], checkComponent.args)
-                  ? 'correct'
-                  : (checkComponent.component
-                      ? checkComponent.component
-                      : checkComponent
-                    ).isCorrect(main.assignments[name], checkComponent.args) ===
-                    undefined
+              ).isCorrect(main.assignments[name], checkComponent.args)
+                ? 'correct'
+                : (checkComponent.component
+                  ? checkComponent.component
+                  : checkComponent
+                ).isCorrect(main.assignments[name], checkComponent.args) ===
+                  undefined
                   ? ''
                   : 'wrong'
-                : ''
-            } ${
-              main.assignments[name].errors &&
+              : ''
+            } ${main.assignments[name].errors &&
               main.assignments[name].errors.constructor.name === 'WeakMap' &&
               main.assignments[name].errors.has(checkComponent)
-                ? 'error'
-                : ''
+              ? 'error'
+              : ''
             }
 
-                                                          ${
-                                                            main.assignments[
-                                                              name
-                                                            ].running &&
-                                                            main.assignments[
-                                                              name
-                                                            ].running
-                                                              .constructor
-                                                              .name ===
-                                                              'WeakMap' &&
-                                                            main.assignments[
-                                                              name
-                                                            ].running.has(
-                                                              checkComponent
-                                                            )
-                                                              ? main.assignments[
-                                                                  name
-                                                                ].running.get(
-                                                                  checkComponent
-                                                                )
-                                                                ? 'running'
-                                                                : 'done'
-                                                              : ''
-                                                          }`"
-            @dblclick="
-              refreshCheckComponent(main.assignments[name], checkComponent)
-            "
-          >
-            <component
-              v-if="checkComponent.args"
-              :is="
-                checkComponent.component
-                  ? checkComponent.component
-                  : checkComponent
-              "
-              :repo="main.assignments[name]"
-              :args="checkComponent.args"
-            />
-            <component
-              v-else
-              :is="
-                checkComponent.component
-                  ? checkComponent.component
-                  : checkComponent
-              "
-              :repo="main.assignments[name]"
-            />
+                                                                      ${main.assignments[
+              name
+            ].running &&
+              main.assignments[
+                name
+              ].running
+                .constructor
+                .name ===
+              'WeakMap' &&
+              main.assignments[
+                name
+              ].running.has(
+                checkComponent
+              )
+              ? main.assignments[
+                name
+              ].running.get(
+                checkComponent
+              )
+                ? 'running'
+                : 'done'
+              : ''
+            }`" @dblclick="
+    refreshCheckComponent(main.assignments[name], checkComponent)
+  ">
+            <component v-if="checkComponent.args" :is="
+              checkComponent.component
+                ? checkComponent.component
+                : checkComponent
+            " :repo="main.assignments[name]" :args="checkComponent.args" />
+            <component v-else :is="
+              checkComponent.component
+                ? checkComponent.component
+                : checkComponent
+            " :repo="main.assignments[name]" />
           </td>
         </tr>
       </tbody>
@@ -349,8 +323,7 @@ function getCommiterIndex(name) {
                   Object.values(main.assignments),
                   check.args
                 )
-              }}</span
-            >
+              }}</span>
           </th>
         </tr>
       </tfoot>
@@ -361,118 +334,102 @@ function getCommiterIndex(name) {
       <h2 @click="refreshAssignment(main.assignments[name])">
         {{ name }} #{{ index + 1 }}
       </h2>
-      <div
-        v-for="(checkComponent, index) in assignmentsChecksFiltered"
-        :key="index"
-        @dblclick="
-          refreshCheckComponent(main.assignments[name], checkComponent)
-        "
-        class="row"
-      >
+      <div v-for="(checkComponent, index) in assignmentsChecksFiltered" :key="index" @dblclick="
+        refreshCheckComponent(main.assignments[name], checkComponent)
+      " class="row">
         <div class="label">{{ checkComponent.title }}</div>
-        <div
-          :class="`content ${
-            (checkComponent.component
+        <div :class="`content ${(checkComponent.component
+            ? checkComponent.component
+            : checkComponent
+          ).isCorrect
+            ? (checkComponent.component
               ? checkComponent.component
               : checkComponent
-            ).isCorrect
-              ? (checkComponent.component
-                  ? checkComponent.component
-                  : checkComponent
-                ).isCorrect(main.assignments[name], checkComponent.args)
-                ? 'correct'
-                : (checkComponent.component
-                    ? checkComponent.component
-                    : checkComponent
-                  ).isCorrect(main.assignments[name], checkComponent.args) ===
-                  undefined
+            ).isCorrect(main.assignments[name], checkComponent.args)
+              ? 'correct'
+              : (checkComponent.component
+                ? checkComponent.component
+                : checkComponent
+              ).isCorrect(main.assignments[name], checkComponent.args) ===
+                undefined
                 ? ''
                 : 'wrong'
-              : ''
-          } ${
-            main.assignments[name].errors &&
+            : ''
+          } ${main.assignments[name].errors &&
             main.assignments[name].errors.constructor.name === 'WeakMap' &&
             main.assignments[name].errors.has(checkComponent)
-              ? 'error'
-              : ''
+            ? 'error'
+            : ''
           }
 
-                                                    ${
-                                                      main.assignments[name]
-                                                        .running &&
-                                                      main.assignments[name]
-                                                        .running.constructor
-                                                        .name === 'WeakMap' &&
-                                                      main.assignments[
-                                                        name
-                                                      ].running.has(
-                                                        checkComponent
-                                                      )
-                                                        ? main.assignments[
-                                                            name
-                                                          ].running.get(
-                                                            checkComponent
-                                                          )
-                                                          ? 'running'
-                                                          : 'done'
-                                                        : ''
-                                                    }`"
-        >
-          <component
-            v-if="checkComponent.args"
-            :is="
-              checkComponent.component
-                ? checkComponent.component
-                : checkComponent
-            "
-            :repo="main.assignments[name]"
-            :args="checkComponent.args"
-          />
-          <component
-            v-else
-            :is="
-              checkComponent.component
-                ? checkComponent.component
-                : checkComponent
-            "
-            :repo="main.assignments[name]"
-          />
+                                                              ${main.assignments[name]
+            .running &&
+            main.assignments[name]
+              .running.constructor
+              .name === 'WeakMap' &&
+            main.assignments[
+              name
+            ].running.has(
+              checkComponent
+            )
+            ? main.assignments[
+              name
+            ].running.get(
+              checkComponent
+            )
+              ? 'running'
+              : 'done'
+            : ''
+          }`">
+          <component v-if="checkComponent.args" :is="
+            checkComponent.component
+              ? checkComponent.component
+              : checkComponent
+          " :repo="main.assignments[name]" :args="checkComponent.args" />
+          <component v-else :is="
+            checkComponent.component
+              ? checkComponent.component
+              : checkComponent
+          " :repo="main.assignments[name]" />
         </div>
       </div>
     </div>
   </div>
-  <div v-if="main.commits.length > 0" class="row">
-    <div class="col-6">
-      <div
-        v-for="c in main.commits.filter(
+  <div class="commit-container">
+    <div v-if="main.commits.length > 0" class="row">
+      <div class="col-6">
+        <div v-for="c in main.commits.filter(
           (c) => c.commit.author.name !== 'github-classroom[bot]'
-        )"
-        class="`commit"
-        :style="{
-          backgroundColor:
-            committer_colors[getCommiterIndex(c.commit.author.name)],
-        }"
-        :key="c.sha"
-      >
-        <i>{{ c.commit.author.name }}</i>
-        {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
-        <a
-          target="_blank"
-          :href="c.html_url"
-          :class="{ merge: c.commit.message.indexOf('Merge') == 0 }"
-          >{{ c.commit.message }}</a
-        >
+        )" class="`commit" :style="{
+  backgroundColor:
+    committer_colors[getCommiterIndex(c.commit.author.name)],
+}" :key="c.sha">
+          <i>{{ c.commit.author.name }}</i>
+          {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
+          <a target="_blank" :href="c.html_url" :class="{ merge: c.commit.message.indexOf('Merge') == 0 }">{{
+            c.commit.message }}</a>
+        </div>
       </div>
-    </div>
-    <div class="col-6 pa-3">
-      <div>
-        <commits-chart :commits="main.commits" />
+      <div class="col-6 pa-3">
+        <div>
+          <commits-chart :commits="main.commits" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style>
+.commit-container {
+  bottom: 0;
+  position: fixed !important;
+  background: white;
+  width: 100%;
+  max-height: 300px;
+  box-shadow: 0px -1px 2px 0px #9e9e9e52;
+  overflow: auto;
+}
+
 .correct,
 .correct a {
   color: rgb(52, 158, 52);
