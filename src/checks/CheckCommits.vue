@@ -138,6 +138,10 @@ export default {
       main,
       showCommits() {
         main.commiterIndex = [];
+        if (main.commits === props.repo.commits) {
+          main.commits = [];
+          return;
+        }
         main.commits = props.repo.commits;
       },
     };
