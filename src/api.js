@@ -21,26 +21,32 @@ export function addNameToUserFromGithub(user) {
     () => {}
   );
 }
-
-Papa.parse("/classroom_roster.csv", {
-  download: true,
-  header: true,
-  complete: (results) => {
-    results.data.forEach((e) => {
-      githubUsernameLookup[e.github_username] = e.identifier;
-    });
-    axios.get("/students.json").then((response) => {
-      const students = response.data;
+export function parseRoster(csv) {
+  for (const key in githubUsernameLookup) {
+    delete githubUsernameLookup[key];
+  }
+  Papa.parse(csv, {
+    download: false,
+    header: true,
+    complete: (results) => {
       results.data.forEach((e) => {
-        const student = students.find(
-          (s) =>
-            e.identifier.includes(s.lastname) &&
-            e.identifier.includes(s.firstname)
-        );
-        if (student) {
-          githubUsernameLookupPics[e.github_username] = student;
-        }
+        githubUsernameLookup[e.github_username] = e.identifier;
       });
-    });
-  },
-});
+      /* TODO handle pics?
+      axios.get("/students.json").then((response) => {
+        const students = response.data;
+        results.data.forEach((e) => {
+          const student = students.find(
+            (s) =>
+              e.identifier.includes(s.lastname) &&
+              e.identifier.includes(s.firstname)
+          );
+          if (student) {
+            githubUsernameLookupPics[e.github_username] = student;
+          }
+        });
+      });
+      */
+    },
+  });
+}

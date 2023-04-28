@@ -3,6 +3,8 @@ import ChecksView from "../views/ChecksView.vue";
 import CreateIssues from "../views/CreateIssues.vue";
 import PreviewView from "../views/PreviewView.vue";
 import RepoCreationChart from "../components/RepoCreationChart.vue";
+import Login from "../views/Login.vue";
+import { fetchAccount, store } from "../appwrite.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,23 +13,53 @@ const router = createRouter({
       path: "/",
       name: "checks",
       component: ChecksView,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: "/login",
+      name: "login",
+      component: Login,
     },
     {
       path: "/preview",
       name: "preview",
       component: PreviewView,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: "/evals",
       name: "evals",
       component: CreateIssues,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: "/chart",
       name: "chart",
       component: RepoCreationChart,
+      meta: {
+        requiresAuth: true,
+      },
     },
   ],
+});
+
+router.beforeEach(async (to, from, next) => {
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    if (store.account || (await fetchAccount())) {
+      next();
+      return;
+    } else {
+      next("/login");
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;

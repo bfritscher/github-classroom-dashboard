@@ -4,7 +4,6 @@ import { createApp, reactive } from "vue";
 export const main = reactive({
   ghApi: {
     rateLimitQueue: [],
-    access_token: localStorage.getItem("access_token"),
     rateLimit: {
       remaining: 0,
       limit: 0,

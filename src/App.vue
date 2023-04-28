@@ -1,19 +1,7 @@
 <script setup>
 import axios from "axios";
-import { ref, computed } from "vue";
 import { main } from "./main.js";
-
-// helper for access_token
-const urlParams = new URLSearchParams(window.location.search);
-const showAuthInfo = ref(urlParams.get("code", false));
-const loginPostCurl = computed(() => {
-  return `curl -X POST https://github.com/login/oauth/access_token -H 'Content-Type: application/json' -d '{"client_id": "0f49b767798fd5815a80", "client_secret": "", "code": "${showAuthInfo.value}"}'`;
-});
-
-function logout() {
-  localStorage.removeItem("access_token");
-  window.location.href = "/";
-}
+import { store, avatars, logout, loadCourseById } from "./appwrite.js";
 
 let interval = undefined;
 
@@ -38,8 +26,8 @@ function clearRateInterval() {
 }
 
 axios.interceptors.request.use((config) => {
-  if (main.ghApi.access_token) {
-    config.headers.authorization = "token " + main.ghApi.access_token;
+  if (store.session?.providerAccessToken) {
+    config.headers.authorization = "token " + store.session.providerAccessToken;
   }
   if (config.url.includes("search/code")) {
     const promise = new Promise((resolve) => {
@@ -100,24 +88,33 @@ axios.interceptors.response.use((response) => {
   <header>
     <nav>
       <h1>Github Classroom Dashboard</h1>
+      <select @change="(event) => loadCourseById(event.target.value)">
+        <option v-for="c in store.courses" :key="c.$id" :value="c.$id">
+          {{ c.year }} {{ c.name }} {{ c.class }}
+        </option>
+      </select>
+      <select>
+        <option>
+          Labo
+        </option>
+        <option>
+          projet
+        </option>
+        <option>
+          projet
+        </option>
+      </select>
       <router-link to="/">Checks</router-link>
       <router-link to="/preview">Preview</router-link>
-      <router-link to="/evals">Uploads</router-link>
       <router-link to="/chart">Chart</router-link>
+      <router-link to="/evals">Upload Issues</router-link>
       <span class="spacer"></span>
-      <a
-        v-if="!main.ghApi.access_token"
-        href="https://github.com/login/oauth/authorize?client_id=0f49b767798fd5815a80&scope=read:org,repo&state=test"
-        >login</a
+      <router-link v-if="store.account" to="/login" @click="logout()">
+        <img class="avatar" :src="avatars.getInitials(store.account.name)" />
+        logout</router-link
       >
-      <a v-else href="logout" @click="logout()">logout</a>
     </nav>
   </header>
-
-  <div v-if="showAuthInfo">
-    <textarea>{{ loginPostCurl }}</textarea>
-  </div>
-
   <main>
     <router-view></router-view>
   </main>
@@ -229,5 +226,12 @@ li {
 }
 .pa-3 {
   margin: 2rem;
+}
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
 }
 </style>
