@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "appwrite": "^11.0.0",
     "axios": "^1.2.0",
     "chart.js": "^4.1.1",
     "chartjs-adapter-date-fns": "^3.0.0",

@@ -1,4 +1,4 @@
-export const GITHUB_ORG = "heg-interschool";
+export let GITHUB_ORG = "heg-web";
 export const API = "https://api.github.com/";
 export const USERNAME_BLACKLIST = [
   "heg-web-bot",
@@ -9,3 +9,6 @@ export const USERNAME_BLACKLIST = [
   "solution",
   "template",
 ];
+export function setGithubOrg(org) {
+  GITHUB_ORG = org;
+}

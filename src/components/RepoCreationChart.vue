@@ -60,7 +60,7 @@ export default {
     },
     sortedAssignments() {
       return Object.values(main.assignments).sort((a, b) => {
-        return a.created_at.localeCompare(b.created_at);
+        return a.created_at?.localeCompare(b.created_at);
       });
     },
     chartData() {
@@ -86,7 +86,7 @@ export default {
       let last_date;
 
       const truncateDate = (date) => {
-        return date.split(":")[0] + ":00:00Z";
+        return date?.split(":")[0] + ":00:00Z";
       };
 
       const addDataPoint = (domain) => {
@@ -109,7 +109,9 @@ export default {
             addDataPoint(domain);
           });
         }
-        domain = extractDomain(githubUsernameLookup[assignment.users[0].login]);
+        domain = extractDomain(
+          githubUsernameLookup[assignment.users[0]?.login]
+        );
         last_date = truncateDate(assignment.created_at);
         cumSum["total"] += 1;
         delta["total"] += 1;
