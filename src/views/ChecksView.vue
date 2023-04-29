@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import axios from "axios";
+import throttle from "lodash/fp/throttle";
 import { repoToGhPagesUrl, toRepo } from "../filters.js";
 import { main } from "../main.js";
 import { API, GITHUB_ORG, USERNAME_BLACKLIST } from "../config.js";
@@ -29,23 +30,25 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
 import CheckEvents from "../checks/CheckEvents.vue";
 
+const CheckLastCommit = {
+  component: DisplayValue,
+  title: "Last Commit",
+  args: {
+    value: (repo) => {
+      const lastCommit = repo.commits[0];
+      return lastCommit
+        ? formatDistanceToNowStrict(new Date(lastCommit.commit.author.date))
+        : "no commits";
+    },
+  },
+};
+
 const checksPresets = {
-  basic: [],
+  basic: [CheckCollaborators, CheckCommits, CheckLastCommit],
   vue: [
     CheckCollaborators,
     CheckCommits,
-    {
-      component: DisplayValue,
-      title: "Last Commit",
-      args: {
-        value: (repo) => {
-          const lastCommit = repo.commits[0];
-          return lastCommit
-            ? formatDistanceToNowStrict(new Date(lastCommit.commit.author.date))
-            : "no commits";
-        },
-      },
-    },
+    CheckLastCommit,
     {
       component: DisplayValue,
       title: "Main",
@@ -143,18 +146,8 @@ const checksPresets = {
   "interschool-project": [
     CheckCollaborators,
     CheckCommits,
-    {
-      component: DisplayValue,
-      title: "Last Commit",
-      args: {
-        value: (repo) => {
-          const lastCommit = repo.commits[0];
-          return lastCommit
-            ? formatDistanceToNowStrict(new Date(lastCommit.commit.author.date))
-            : "no commits";
-        },
-      },
-    },
+    CheckLastCommit,
+    CheckBranches,
     CheckEvents,
     CheckReadmeMembers,
     CheckReadmeImages,
@@ -162,6 +155,7 @@ const checksPresets = {
 };
 
 const search = ref("");
+const cutOff = ref(4);
 
 const assignmentsChecksFiltered = computed(() => {
   return (checksPresets[store.assignment.check] || []).filter((c) => {
@@ -215,14 +209,26 @@ function clear() {
 function fetchAndRefresh() {
   async function getRepos(page) {
     await axios
-      .get(`${API}orgs/${GITHUB_ORG}/repos?per_page=100&page=${page}`)
+      .get(
+        `${API}orgs/${GITHUB_ORG}/repos?sort=created&direction=desc&per_page=100&page=${page}`
+      )
       .then(async (response) => {
         response.data
           .filter((repo) => {
+            const cutOffDate =
+              new Date().getTime() - 1000 * 60 * 60 * 24 * 30 * cutOff.value;
+            const isOlderThanCutOff =
+              new Date(repo.created_at).getTime() < cutOffDate;
+            const isInBlacklist = USERNAME_BLACKLIST.some((name) =>
+              repo.name.includes(name)
+            );
+            const startsWithPrefix = repo.name.startsWith(
+              store.assignment.prefix
+            );
+            const isExactMatch = repo.name === store.assignment.prefix;
             return (
-              (!USERNAME_BLACKLIST.some((name) => repo.name.includes(name)) &&
-                repo.name.startsWith(store.assignment.prefix)) ||
-              repo.name === store.assignment.prefix
+              (!isInBlacklist && startsWithPrefix && !isOlderThanCutOff) ||
+              isExactMatch
             );
           })
           .forEach((repo) => {
@@ -260,11 +266,13 @@ function promptRemove(name) {
   }
 }
 
-function saveAssignments() {
+function _saveAssignments() {
   updateCurrentAssignment({
     data: JSON.stringify(main.assignments),
   });
 }
+
+const saveAssignments = throttle(1000, _saveAssignments);
 
 async function refreshAssignment(repo) {
   repo.errors = new WeakMap();
@@ -330,6 +338,10 @@ function getCommiterIndex(name) {
           "
           :value="store.assignment.prefix"
       /></label>
+      <label
+        >CutOff
+        <input v-model.number="cutOff" type="number" style="width: 30px" />
+      </label>
       <button @click="fetchAndRefresh()">fetch repos</button>
       <span
         >{{ main.ghApi.rateLimit.remaining }} /
