@@ -1,17 +1,8 @@
-add roster
-select assignments
-save/load data
-save/load prefix
-set checktypes
-save/load last selected course/assignment
+commit date filter
 
-handle filter for classes?
+deploy to github pages
 
 handle pics?
 
-- show selected project
-- extract first letter?
-- extract teacher and topic?
-- localstorage settings?
 - view mode with json?
 - elipsis for project title?

@@ -25,14 +25,15 @@ export function parseRoster(csv) {
   for (const key in githubUsernameLookup) {
     delete githubUsernameLookup[key];
   }
-  Papa.parse(csv, {
-    download: false,
-    header: true,
-    complete: (results) => {
-      results.data.forEach((e) => {
-        githubUsernameLookup[e.github_username] = e.identifier;
-      });
-      /* TODO handle pics?
+  try {
+    Papa.parse(csv, {
+      download: false,
+      header: true,
+      complete: (results) => {
+        results.data.forEach((e) => {
+          githubUsernameLookup[e.github_username] = e.identifier;
+        });
+        /* TODO handle pics?
       axios.get("/students.json").then((response) => {
         const students = response.data;
         results.data.forEach((e) => {
@@ -47,6 +48,9 @@ export function parseRoster(csv) {
         });
       });
       */
-    },
-  });
+      },
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }

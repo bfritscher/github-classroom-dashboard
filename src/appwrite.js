@@ -6,10 +6,12 @@ import {
   Avatars,
   Storage,
   Query,
+  ID,
 } from "appwrite";
 import { reactive } from "vue";
 import { setGithubOrg } from "./config.js";
 import { parseRoster } from "./api.js";
+import { main } from "./main.js";
 
 export const client = new Client()
   .setEndpoint("https://appwrite.bf0.ch/v1")
@@ -26,6 +28,8 @@ export const store = reactive({
   session: undefined,
   courses: [],
   course: undefined,
+  assignment: undefined,
+  preferences: {},
 });
 
 export function loginGithub() {
@@ -48,9 +52,13 @@ export async function fetchAccount() {
         Query.orderAsc("name"),
       ])
     ).documents;
-    // TODO select last selected from localstorage
+    store.preferences = (await accountClient.getPrefs()) || {};
     if (store.courses.length > 0) {
-      loadCourseById(store.courses[0].$id);
+      if (store.preferences.lastCourse) {
+        loadCourseById(store.preferences.lastCourse);
+      } else {
+        loadCourseById(store.courses[0].$id);
+      }
     }
     return true;
   } catch (e) {
@@ -69,8 +77,67 @@ export async function logout() {
   }
 }
 
+export async function updatePreferences(changes) {
+  store.preferences = Object.assign({}, store.preferences, changes);
+  accountClient.updatePrefs(store.preferences);
+}
+
 export async function loadCourseById(id) {
   store.course = await databases.getDocument("production", "courses", id);
   setGithubOrg(store.course.github_org);
   parseRoster(store.course.roster);
+  store.course.assignments = (
+    await databases.listDocuments("production", "assignments", [
+      Query.select(["name"]),
+      Query.equal("course", [store.course.$id]),
+      Query.orderAsc("name"),
+    ])
+  ).documents;
+  store.assignment = undefined;
+  updatePreferences({ lastCourse: store.course.$id });
+  if (store.course.assignments.length > 0) {
+    if (store.preferences[store.course.$id]) {
+      loadAssignmentById(store.preferences[store.course.$id]);
+    } else {
+      loadAssignmentById(store.course.assignments[0].$id);
+    }
+  }
+}
+
+export async function addAssignment() {
+  const name = prompt("Assignment Name");
+  if (name) {
+    const assignment = await databases.createDocument(
+      "production",
+      "assignments",
+      ID.unique(),
+      {
+        name,
+        course: store.course.$id,
+      }
+    );
+    store.course.assignments.push(assignment);
+    loadAssignmentById(assignment.$id);
+  }
+}
+
+export async function loadAssignmentById(id) {
+  store.assignment = await databases.getDocument(
+    "production",
+    "assignments",
+    id
+  );
+  main.assignments = JSON.parse(store.assignment.data || "{}");
+  const change = {};
+  change[store.course.$id] = store.assignment.$id;
+  updatePreferences(change);
+}
+
+export async function updateCurrentAssignment(changes) {
+  store.assignment = await databases.updateDocument(
+    "production",
+    "assignments",
+    store.assignment.$id,
+    changes
+  );
 }

@@ -23,8 +23,7 @@ export const main = reactive({
   showSearch: false,
   showPic: false,
   showCards: false,
-  assignments: JSON.parse(localStorage.getItem("assignments") || "{}"),
-  classroomProjectPrefix: localStorage.getItem("classroomProjectPrefix"),
+  assignments: {},
   commits: [],
   commiterIndex: [],
 });

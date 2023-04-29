@@ -1,7 +1,14 @@
 <script setup>
 import axios from "axios";
 import { main } from "./main.js";
-import { store, avatars, logout, loadCourseById } from "./appwrite.js";
+import {
+  store,
+  avatars,
+  logout,
+  loadCourseById,
+  addAssignment,
+  loadAssignmentById,
+} from "./appwrite.js";
 
 let interval = undefined;
 
@@ -89,21 +96,30 @@ axios.interceptors.response.use((response) => {
     <nav>
       <h1>Github Classroom Dashboard</h1>
       <select @change="(event) => loadCourseById(event.target.value)">
-        <option v-for="c in store.courses" :key="c.$id" :value="c.$id">
+        <option></option>
+        <option
+          v-for="c in store.courses"
+          :key="c.$id"
+          :value="c.$id"
+          :selected="store.course?.$id == c.$id"
+        >
           {{ c.year }} {{ c.name }} {{ c.class }}
         </option>
       </select>
-      <select>
-        <option>
-          Labo
-        </option>
-        <option>
-          projet
-        </option>
-        <option>
-          projet
+      <select
+        v-if="store.course"
+        @change="(event) => loadAssignmentById(event.target.value)"
+      >
+        <option
+          v-for="a in store.course.assignments"
+          :key="a.$id"
+          :value="a.$id"
+          :selected="store.assignment?.$id == a.$id"
+        >
+          {{ a.name }}
         </option>
       </select>
+      <a @click="addAssignment()">+</a>
       <router-link to="/">Checks</router-link>
       <router-link to="/preview">Preview</router-link>
       <router-link to="/chart">Chart</router-link>
@@ -208,9 +224,11 @@ li {
 .text-nowrap {
   white-space: nowrap;
 }
+
 .text-right {
   text-align: right;
 }
+
 .text-center {
   text-align: center;
 }
@@ -218,15 +236,19 @@ li {
 .flex {
   flex: 1;
 }
+
 .row {
   display: flex;
 }
+
 .col-6 {
   width: 50%;
 }
+
 .pa-3 {
   margin: 2rem;
 }
+
 .avatar {
   width: 24px;
   height: 24px;
