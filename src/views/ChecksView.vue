@@ -1,10 +1,11 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import axios from "axios";
-import { repoToGhPagesUrl } from "../filters.js";
+import { repoToGhPagesUrl, toRepo } from "../filters.js";
 import { main } from "../main.js";
 import { API, GITHUB_ORG, USERNAME_BLACKLIST } from "../config.js";
 import { githubUsernameLookup } from "../api.js";
+import { store, updateCurrentAssignment } from "../appwrite.js";
 import CheckCollaborators from "../checks/CheckCollaborators.vue";
 import CheckCommits from "../checks/CheckCommits.vue";
 import CheckBranches from "../checks/CheckBranches.vue";
@@ -28,30 +29,142 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
 import CheckEvents from "../checks/CheckEvents.vue";
 
-const assignmentsChecks = [
-  CheckCollaborators,
-  CheckCommits,
-  {
-    component: DisplayValue,
-    title: "Last Commit",
-    args: {
-      value: (repo) => {
-        const lastCommit = repo.commits[0];
-        return lastCommit
-          ? formatDistanceToNowStrict(new Date(lastCommit.commit.author.date))
-          : "no commits";
+const checksPresets = {
+  basic: [],
+  vue: [
+    CheckCollaborators,
+    CheckCommits,
+    {
+      component: DisplayValue,
+      title: "Last Commit",
+      args: {
+        value: (repo) => {
+          const lastCommit = repo.commits[0];
+          return lastCommit
+            ? formatDistanceToNowStrict(new Date(lastCommit.commit.author.date))
+            : "no commits";
+        },
       },
     },
-  },
-  CheckEvents,
-  //CheckReadmeMembers,
-  CheckReadmeImages,
-];
+    {
+      component: DisplayValue,
+      title: "Main",
+      args: {
+        value: "hasMain",
+        href: (repo) => `${toRepo(repo.name)}/tree/main`,
+      },
+    },
+    {
+      component: DisplayValue,
+      title: "GhPages",
+      args: {
+        value: "hasGhPages",
+        href: (repo) => `${toRepo(repo.name)}/tree/gh-pages`,
+      },
+    },
+    CheckGhPagesStatus,
+    CheckGhPagesIsDist,
+    CheckViteConfig,
+    CheckReadme,
+    {
+      component: CheckRelease,
+      title: "Release 2.0.0",
+      args: ["2.0.0"],
+    },
+    CheckIndex,
+    CheckFavIcon,
+    CheckBranches,
+    {
+      component: DisplayValue,
+      title: "Tags",
+      args: {
+        value: "releases",
+      },
+    },
+    {
+      component: DisplayValue,
+      title: "Style",
+      args: { value: "style" },
+    },
+    CheckDependencies,
+    CheckEslint,
+    CheckRoutes,
+    {
+      component: DisplayValue,
+      title: "Route Params",
+      args: {
+        value: (repo) => {
+          return repo.routes?.filter((r) => r.includes(":"));
+        },
+      },
+    },
+    // search is low because of rate limit add it at the end
+    {
+      component: SearchString,
+      title: "axios",
+      args: ["axios", "axios"],
+    },
+    {
+      component: SearchString,
+      title: "props",
+      args: ["props", "props"],
+    },
+    {
+      component: SearchString,
+      title: "$emit",
+      args: ["$emit", "emit"],
+    },
+    {
+      component: SearchString,
+      title: "$root",
+      args: ["$root", "root"],
+    },
+    {
+      component: SearchString,
+      title: "JSON.parse",
+      args: ["JSON.parse", "jsonP"],
+    },
+    {
+      component: SearchString,
+      title: "JSON.stringify",
+      args: ["JSON.stringify", "jsonS"],
+    },
+    {
+      component: SearchString,
+      title: "console.log",
+      args: ["console.log", "console"],
+    },
+    {
+      component: SearchString,
+      title: "localStorage",
+      args: ["localStorage", "localStorage"],
+    },
+  ],
+  "interschool-project": [
+    CheckCollaborators,
+    CheckCommits,
+    {
+      component: DisplayValue,
+      title: "Last Commit",
+      args: {
+        value: (repo) => {
+          const lastCommit = repo.commits[0];
+          return lastCommit
+            ? formatDistanceToNowStrict(new Date(lastCommit.commit.author.date))
+            : "no commits";
+        },
+      },
+    },
+    CheckEvents,
+    CheckReadmeMembers,
+    CheckReadmeImages,
+  ],
+};
 
 const search = ref("");
 
 const assignmentsChecksFiltered = computed(() => {
-  return assignmentsChecks.filter((c) => {
+  return (checksPresets[store.assignment.check] || []).filter((c) => {
     if (c.component === SearchString) {
       return main.showSearch;
     }
@@ -92,12 +205,11 @@ function getUrls() {
   );
 }
 
-function saveProjectPrefix() {
-  localStorage.setItem("classroomProjectPrefix", main.classroomProjectPrefix);
-}
-
 function clear() {
-  main.assignments = {};
+  if (confirm("Are you sure you want to clear all assignments?")) {
+    main.assignments = {};
+    saveAssignments();
+  }
 }
 
 function fetchAndRefresh() {
@@ -109,8 +221,8 @@ function fetchAndRefresh() {
           .filter((repo) => {
             return (
               (!USERNAME_BLACKLIST.some((name) => repo.name.includes(name)) &&
-                repo.name.startsWith(main.classroomProjectPrefix)) ||
-              repo.name === main.classroomProjectPrefix
+                repo.name.startsWith(store.assignment.prefix)) ||
+              repo.name === store.assignment.prefix
             );
           })
           .forEach((repo) => {
@@ -149,7 +261,9 @@ function promptRemove(name) {
 }
 
 function saveAssignments() {
-  localStorage.setItem("assignments", JSON.stringify(main.assignments));
+  updateCurrentAssignment({
+    data: JSON.stringify(main.assignments),
+  });
 }
 
 async function refreshAssignment(repo) {
@@ -203,83 +317,108 @@ function getCommiterIndex(name) {
 </script>
 
 <template>
-  <div class="submenu">
-    <label
-      >Prefix:
-      <input
-        style="width: 60px"
-        type="text"
-        placeholder="prefix"
-        @change="saveProjectPrefix()"
-        v-model="main.classroomProjectPrefix"
-    /></label>
-    <button @click="fetchAndRefresh()">fetch repos</button>
-    <span
-      >{{ main.ghApi.rateLimit.remaining }} /
-      {{ main.ghApi.rateLimit.limit }} reset in
-      {{ main.ghApi.rateLimit.resetCoutdown() }} min
-      {{ main.ghApi.rateLimitQueue.length }} in queue
-    </span>
+  <div v-if="store.assignment">
+    <div class="submenu">
+      <label
+        >Prefix:
+        <input
+          style="width: 80px"
+          type="text"
+          placeholder="prefix"
+          @change="
+            (event) => updateCurrentAssignment({ prefix: event.target.value })
+          "
+          :value="store.assignment.prefix"
+      /></label>
+      <button @click="fetchAndRefresh()">fetch repos</button>
+      <span
+        >{{ main.ghApi.rateLimit.remaining }} /
+        {{ main.ghApi.rateLimit.limit }} reset in
+        {{ main.ghApi.rateLimit.resetCoutdown() }} min
+        {{ main.ghApi.rateLimitQueue.length }} in queue
+      </span>
 
-    <label><input type="checkbox" v-model="main.showDetails" /> Details</label>
-    <label><input type="checkbox" v-model="main.showSearch" /> Search</label>
-    <label><input type="checkbox" v-model="main.showPic" /> Pic</label>
-    <label><input type="checkbox" v-model="main.showCards" /> Cards View</label>
-    <span class="spacer"></span>
-    <a :href="getUrls()" download="urls.txt">download urls.txt</a>
-    <button @click="clear()">clear</button>
-  </div>
-
-  <h2>Checks <input v-model="search" placeholder="filter" /></h2>
-  <div class="overflow" v-if="!main.showCards">
-    <table>
-      <thead>
-        <tr>
-          <th @click="refreshAll()">🗘</th>
-          <th>Project</th>
-          <th
-            v-for="(check, index) in assignmentsChecksFiltered"
-            :key="index"
-            @click="refreshCheckRow(check)"
+      <label
+        ><input type="checkbox" v-model="main.showDetails" /> Details</label
+      >
+      <label><input type="checkbox" v-model="main.showSearch" /> Search</label>
+      <label><input type="checkbox" v-model="main.showPic" /> Pic</label>
+      <label
+        ><input type="checkbox" v-model="main.showCards" /> Cards View</label
+      >
+      <label>
+        Checks:
+        <select
+          @change="
+            (event) => updateCurrentAssignment({ check: event.target.value })
+          "
+        >
+          <option
+            v-for="(value, o) in checksPresets"
+            :key="o"
+            :selected="o == store.assignment.check"
           >
-            {{ check.title }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(name, index) in sortedAssignments" :key="name">
-          <td @click="refreshAssignment(main.assignments[name])">
-            {{ index + 1 }}
-          </td>
-          <td @dblclick="promptRemove(name)">{{ name }}</td>
-          <td
-            v-for="(checkComponent, index) in assignmentsChecksFiltered"
-            :key="index"
-            :class="`${
-              (checkComponent.component
-                ? checkComponent.component
-                : checkComponent
-              ).isCorrect
-                ? (checkComponent.component
-                    ? checkComponent.component
-                    : checkComponent
-                  ).isCorrect(main.assignments[name], checkComponent.args)
-                  ? 'correct'
-                  : (checkComponent.component
+            {{ o }}
+          </option>
+        </select>
+      </label>
+      <span class="spacer"></span>
+      <a :href="getUrls()" download="urls.txt">download urls.txt</a>
+      <button @click="clear()">clear</button>
+    </div>
+
+    <h2>Checks <input v-model="search" placeholder="filter" /></h2>
+    <div class="overflow" v-if="!main.showCards">
+      <table>
+        <thead>
+          <tr>
+            <th @click="refreshAll()">🗘</th>
+            <th>Project</th>
+            <th
+              v-for="(check, index) in assignmentsChecksFiltered"
+              :key="index"
+              @click="refreshCheckRow(check)"
+            >
+              {{ check.title }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(name, index) in sortedAssignments" :key="name">
+            <td @click="refreshAssignment(main.assignments[name])">
+              {{ index + 1 }}
+            </td>
+            <td @dblclick="promptRemove(name)">{{ name }}</td>
+            <td
+              v-for="(checkComponent, index) in assignmentsChecksFiltered"
+              :key="index"
+              :class="`${
+                (checkComponent.component
+                  ? checkComponent.component
+                  : checkComponent
+                ).isCorrect
+                  ? (checkComponent.component
                       ? checkComponent.component
                       : checkComponent
-                    ).isCorrect(main.assignments[name], checkComponent.args) ===
-                    undefined
-                  ? ''
-                  : 'wrong'
-                : ''
-            } ${
-              main.assignments[name].errors &&
-              main.assignments[name].errors.constructor.name === 'WeakMap' &&
-              main.assignments[name].errors.has(checkComponent)
-                ? 'error'
-                : ''
-            }
+                    ).isCorrect(main.assignments[name], checkComponent.args)
+                    ? 'correct'
+                    : (checkComponent.component
+                        ? checkComponent.component
+                        : checkComponent
+                      ).isCorrect(
+                        main.assignments[name],
+                        checkComponent.args
+                      ) === undefined
+                    ? ''
+                    : 'wrong'
+                  : ''
+              } ${
+                main.assignments[name].errors &&
+                main.assignments[name].errors.constructor.name === 'WeakMap' &&
+                main.assignments[name].errors.has(checkComponent)
+                  ? 'error'
+                  : ''
+              }
 
                                                                       ${
                                                                         main
@@ -309,90 +448,93 @@ function getCommiterIndex(name) {
                                                                             : 'done'
                                                                           : ''
                                                                       }`"
-            @dblclick="
-              refreshCheckComponent(main.assignments[name], checkComponent)
-            "
-          >
-            <component
-              v-if="checkComponent.args"
-              :is="
-                checkComponent.component
-                  ? checkComponent.component
-                  : checkComponent
+              @dblclick="
+                refreshCheckComponent(main.assignments[name], checkComponent)
               "
-              :repo="main.assignments[name]"
-              :args="checkComponent.args"
-            />
-            <component
-              v-else
-              :is="
-                checkComponent.component
-                  ? checkComponent.component
-                  : checkComponent
-              "
-              :repo="main.assignments[name]"
-            />
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th></th>
-          <th></th>
-          <th v-for="(check, index) in assignmentsChecksFiltered" :key="index">
-            <span v-if="(check.component || check).total">
-              {{
-                (check.component || check).total(
-                  Object.values(main.assignments),
-                  check.args
-                )
-              }}</span
             >
-          </th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-  <div v-if="main.showCards">
-    <div v-for="(name, index) in sortedAssignments" :key="name" class="card">
-      <h2 @click="refreshAssignment(main.assignments[name])">
-        {{ name }} #{{ index + 1 }}
-      </h2>
-      <div
-        v-for="(checkComponent, index) in assignmentsChecksFiltered"
-        :key="index"
-        @dblclick="
-          refreshCheckComponent(main.assignments[name], checkComponent)
-        "
-        class="row"
-      >
-        <div class="label">{{ checkComponent.title }}</div>
-        <div
-          :class="`content ${
-            (checkComponent.component
-              ? checkComponent.component
-              : checkComponent
-            ).isCorrect
-              ? (checkComponent.component
-                  ? checkComponent.component
-                  : checkComponent
-                ).isCorrect(main.assignments[name], checkComponent.args)
-                ? 'correct'
-                : (checkComponent.component
+              <component
+                v-if="checkComponent.args"
+                :is="
+                  checkComponent.component
                     ? checkComponent.component
                     : checkComponent
-                  ).isCorrect(main.assignments[name], checkComponent.args) ===
-                  undefined
-                ? ''
-                : 'wrong'
-              : ''
-          } ${
-            main.assignments[name].errors &&
-            main.assignments[name].errors.constructor.name === 'WeakMap' &&
-            main.assignments[name].errors.has(checkComponent)
-              ? 'error'
-              : ''
-          }
+                "
+                :repo="main.assignments[name]"
+                :args="checkComponent.args"
+              />
+              <component
+                v-else
+                :is="
+                  checkComponent.component
+                    ? checkComponent.component
+                    : checkComponent
+                "
+                :repo="main.assignments[name]"
+              />
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th></th>
+            <th></th>
+            <th
+              v-for="(check, index) in assignmentsChecksFiltered"
+              :key="index"
+            >
+              <span v-if="(check.component || check).total">
+                {{
+                  (check.component || check).total(
+                    Object.values(main.assignments),
+                    check.args
+                  )
+                }}</span
+              >
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div v-if="main.showCards">
+      <div v-for="(name, index) in sortedAssignments" :key="name" class="card">
+        <h2 @click="refreshAssignment(main.assignments[name])">
+          {{ name }} #{{ index + 1 }}
+        </h2>
+        <div
+          v-for="(checkComponent, index) in assignmentsChecksFiltered"
+          :key="index"
+          @dblclick="
+            refreshCheckComponent(main.assignments[name], checkComponent)
+          "
+          class="row"
+        >
+          <div class="label">{{ checkComponent.title }}</div>
+          <div
+            :class="`content ${
+              (checkComponent.component
+                ? checkComponent.component
+                : checkComponent
+              ).isCorrect
+                ? (checkComponent.component
+                    ? checkComponent.component
+                    : checkComponent
+                  ).isCorrect(main.assignments[name], checkComponent.args)
+                  ? 'correct'
+                  : (checkComponent.component
+                      ? checkComponent.component
+                      : checkComponent
+                    ).isCorrect(main.assignments[name], checkComponent.args) ===
+                    undefined
+                  ? ''
+                  : 'wrong'
+                : ''
+            } ${
+              main.assignments[name].errors &&
+              main.assignments[name].errors.constructor.name === 'WeakMap' &&
+              main.assignments[name].errors.has(checkComponent)
+                ? 'error'
+                : ''
+            }
 
                                                               ${
                                                                 main
@@ -420,57 +562,58 @@ function getCommiterIndex(name) {
                                                                     : 'done'
                                                                   : ''
                                                               }`"
-        >
-          <component
-            v-if="checkComponent.args"
-            :is="
-              checkComponent.component
-                ? checkComponent.component
-                : checkComponent
-            "
-            :repo="main.assignments[name]"
-            :args="checkComponent.args"
-          />
-          <component
-            v-else
-            :is="
-              checkComponent.component
-                ? checkComponent.component
-                : checkComponent
-            "
-            :repo="main.assignments[name]"
-          />
+          >
+            <component
+              v-if="checkComponent.args"
+              :is="
+                checkComponent.component
+                  ? checkComponent.component
+                  : checkComponent
+              "
+              :repo="main.assignments[name]"
+              :args="checkComponent.args"
+            />
+            <component
+              v-else
+              :is="
+                checkComponent.component
+                  ? checkComponent.component
+                  : checkComponent
+              "
+              :repo="main.assignments[name]"
+            />
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="commit-container">
-    <div v-if="main.commits.length > 0" class="row">
-      <div class="col-6">
-        <div
-          v-for="c in main.commits.filter(
-            (c) => c.commit.author.name !== 'github-classroom[bot]'
-          )"
-          class="`commit"
-          :style="{
-            backgroundColor:
-              committer_colors[getCommiterIndex(c.commit.author.name)],
-          }"
-          :key="c.sha"
-        >
-          <i>{{ c.commit.author.name }}</i>
-          {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
-          <a
-            target="_blank"
-            :href="c.html_url"
-            :class="{ merge: c.commit.message.indexOf('Merge') == 0 }"
-            >{{ c.commit.message }}</a
+    <div class="commit-container">
+      <div v-if="main.commits.length > 0" class="row">
+        <div class="col-6">
+          <div
+            v-for="c in main.commits.filter(
+              (c) => c.commit.author.name !== 'github-classroom[bot]'
+            )"
+            class="`commit"
+            :style="{
+              backgroundColor:
+                committer_colors[getCommiterIndex(c.commit.author.name)],
+            }"
+            :key="c.sha"
           >
+            <i>{{ c.commit.author.name }}</i>
+            {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
+            <a
+              target="_blank"
+              :href="c.html_url"
+              :class="{ merge: c.commit.message.indexOf('Merge') == 0 }"
+              >{{ c.commit.message }}</a
+            >
+          </div>
         </div>
-      </div>
-      <div class="col-6 pa-3">
-        <div>
-          <commits-chart :commits="main.commits" />
+        <div class="col-6 pa-3">
+          <div>
+            <commits-chart :commits="main.commits" />
+          </div>
         </div>
       </div>
     </div>
