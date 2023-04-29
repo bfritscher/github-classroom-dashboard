@@ -1,13 +1,12 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import ChecksView from "../views/ChecksView.vue";
-import CreateIssues from "../views/CreateIssues.vue";
 import PreviewView from "../views/PreviewView.vue";
 import RepoCreationChart from "../components/RepoCreationChart.vue";
 import Login from "../views/Login.vue";
 import { fetchAccount, store } from "../appwrite.js";
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
@@ -33,7 +32,7 @@ const router = createRouter({
     {
       path: "/evals",
       name: "evals",
-      component: CreateIssues,
+      component: () => import("../views/CreateIssues.vue"),
       meta: {
         requiresAuth: true,
       },
