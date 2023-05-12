@@ -1,9 +1,9 @@
 <template>
   <a
     target="_blank"
-    :href="`${repoUrl}/blob/${
-      repo.hasMain ? 'main' : 'master'
-    }/src/router/index.js`"
+    :href="`${repoUrl}/blob/${repo.hasMain ? 'main' : 'master'}/${
+      repo.baseDirOverride || ''
+    }src/router/index.js`"
   >
     <div v-if="props.repo.routes" class="text-right">
       {{ props.repo.routes.length }}
@@ -26,7 +26,11 @@ const regexRoutePath = /path:.*?["'](.+)["']/g;
 function checkRoutes(repo) {
   repo.routes = [];
   return axios
-    .get(`${toRepoAPI(repo.name)}/contents/src/router/index.js`)
+    .get(
+      `${toRepoAPI(repo.name)}/contents/${
+        repo.baseDirOverride || ""
+      }src/router/index.js`
+    )
     .then((response) => {
       const raw = b64DecodeUnicode(response.data.content);
       repo.routes = [...raw.matchAll(regexRoutePath)].map((m) => m[1]);

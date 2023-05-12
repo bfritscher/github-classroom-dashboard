@@ -1,7 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import axios from "axios";
-import throttle from "lodash/fp/throttle";
 import { repoToGhPagesUrl, toRepo } from "../filters.js";
 import { main } from "../main.js";
 import { API, GITHUB_ORG, USERNAME_BLACKLIST } from "../config.js";
@@ -24,11 +23,12 @@ import CheckDependencies from "../checks/CheckDependencies.vue";
 import CheckViteConfig from "../checks/CheckViteConfig.vue";
 import CheckEslint from "../checks/CheckEslint.vue";
 import CheckRoutes from "../checks/CheckRoutes.vue";
+import CheckEvents from "../checks/CheckEvents.vue";
+import CheckFile from "../checks/CheckFile.vue";
 import CommitsChart from "../components/CommitsChart.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
-import CheckEvents from "../checks/CheckEvents.vue";
 
 const CheckLastCommit = {
   component: DisplayValue,
@@ -105,45 +105,61 @@ const checksPresets = {
     {
       component: SearchString,
       title: "axios",
-      args: ["axios", "axios"],
+      args: {
+        q: "axios in:file extension:js extension:vue",
+      },
     },
     {
       component: SearchString,
       title: "props",
-      args: ["props", "props"],
+      args: {
+        q: "props in:file extension:js extension:vue",
+      },
     },
     {
       component: SearchString,
       title: "$emit",
-      args: ["$emit", "emit"],
+      args: {
+        q: "$emit in:file extension:js extension:vue",
+      },
     },
     {
       component: SearchString,
       title: "$root",
-      args: ["$root", "root"],
+      args: {
+        q: "$root in:file extension:js extension:vue",
+      },
     },
     {
       component: SearchString,
       title: "JSON.parse",
-      args: ["JSON.parse", "jsonP"],
+      args: {
+        q: "JSON.parse in:file extension:js extension:vue",
+      },
     },
     {
       component: SearchString,
       title: "JSON.stringify",
-      args: ["JSON.stringify", "jsonS"],
+      args: {
+        q: "JSON.stringify in:file extension:js extension:vue",
+      },
     },
     {
       component: SearchString,
       title: "console.log",
-      args: ["console.log", "console"],
+      args: {
+        q: "console.log in:file extension:js extension:vue",
+      },
     },
     {
       component: SearchString,
       title: "localStorage",
-      args: ["localStorage", "localStorage"],
+      args: {
+        q: "localStorage in:file extension:js extension:vue",
+      },
     },
   ],
-  "interschool-project": [
+  "interschool-readme": [
     CheckCollaborators,
     CheckCommits,
     CheckLastCommit,
@@ -151,6 +167,45 @@ const checksPresets = {
     CheckEvents,
     CheckReadmeMembers,
     CheckReadmeImages,
+  ],
+  "interschool-project": [
+    CheckCollaborators,
+    CheckCommits,
+    CheckLastCommit,
+    CheckBranches,
+    {
+      component: CheckFile,
+      title: "Models",
+      args: {
+        path: "backend/api/models.py",
+        regex: /class (.*?)\(/g,
+      },
+    },
+    {
+      component: CheckFile,
+      title: "Admin",
+      args: {
+        path: "backend/api/admin.py",
+        regex: /class (.*?)\(|register\(.*?\)/g,
+      },
+    },
+    {
+      component: CheckFile,
+      title: "Urls",
+      args: {
+        path: "backend/urls.py",
+        regex: /router.register\((.*?)\)/g,
+      },
+    },
+    CheckDependencies,
+    CheckRoutes,
+    {
+      component: SearchString,
+      title: "pycache",
+      args: {
+        q: "__pycache__",
+      },
+    },
   ],
 };
 
@@ -202,7 +257,7 @@ function getUrls() {
 function clear() {
   if (confirm("Are you sure you want to clear all assignments?")) {
     main.assignments = {};
-    saveAssignments();
+    main.saveAssignments();
   }
 }
 
@@ -262,17 +317,9 @@ function refreshAll() {
 function promptRemove(name) {
   if (confirm('Are you sure you want to remove "' + name + '"?')) {
     delete main.assignments[name];
-    saveAssignments();
+    main.saveAssignments();
   }
 }
-
-function _saveAssignments() {
-  updateCurrentAssignment({
-    data: JSON.stringify(main.assignments),
-  });
-}
-
-const saveAssignments = throttle(1000, _saveAssignments);
 
 async function refreshAssignment(repo) {
   repo.errors = new WeakMap();
@@ -306,7 +353,7 @@ async function refreshCheckComponent(repo, checkComponent) {
     repo.errors.set(checkComponent, e);
   } finally {
     repo.running.set(checkComponent, false);
-    saveAssignments();
+    main.saveAssignments();
   }
 }
 

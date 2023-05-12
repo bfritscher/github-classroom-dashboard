@@ -24,7 +24,7 @@ function startRateInterval() {
   };
 
   func();
-  interval = setInterval(func, 2100);
+  interval = setInterval(func, 6200);
 }
 
 function clearRateInterval() {

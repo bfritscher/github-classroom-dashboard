@@ -1,7 +1,9 @@
 <template>
   <a
     target="_blank"
-    :href="`${repoUrl}/blob/${repo.hasMain ? 'main' : 'master'}/package.json`"
+    :href="`${repoUrl}/blob/${repo.hasMain ? 'main' : 'master'}/${
+      repo.baseDirOverride || ''
+    }package.json`"
   >
     <div v-if="props.repo.dependencies" class="text-right">
       {{ Object.keys(props.repo.dependencies).length }}
@@ -22,7 +24,11 @@ import { main } from "../main.js";
 function checkDependencies(repo) {
   repo.dependencies = {};
   return axios
-    .get(`${toRepoAPI(repo.name)}/contents/package.json`)
+    .get(
+      `${toRepoAPI(repo.name)}/contents/${
+        repo.baseDirOverride || ""
+      }package.json`
+    )
     .then((response) => {
       const raw = b64DecodeUnicode(response.data.content);
       const packageJson = JSON.parse(raw);

@@ -1,4 +1,12 @@
 import { createApp, reactive } from "vue";
+import throttle from "lodash/fp/throttle";
+import { updateCurrentAssignment } from "./appwrite.js";
+
+function _saveAssignments() {
+  updateCurrentAssignment({
+    data: JSON.stringify(main.assignments),
+  });
+}
 
 // global app state
 export const main = reactive({
@@ -19,6 +27,7 @@ export const main = reactive({
       },
     },
   },
+  saveAssignments: throttle(1000, _saveAssignments),
   showDetails: false,
   showSearch: false,
   showPic: false,
