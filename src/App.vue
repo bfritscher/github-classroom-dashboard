@@ -36,7 +36,7 @@ axios.interceptors.request.use((config) => {
   if (store.session?.providerAccessToken) {
     config.headers.authorization = "token " + store.session.providerAccessToken;
   }
-  if (config.url.includes("search/code")) {
+  if (config.url.includes("search/code") && config.url.includes("github")) {
     const promise = new Promise((resolve) => {
       main.ghApi.rateLimitQueue.push({
         config,

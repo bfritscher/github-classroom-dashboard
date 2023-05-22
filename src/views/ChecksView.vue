@@ -102,6 +102,7 @@ const checksPresets = {
       },
     },
     // search is low because of rate limit add it at the end
+    // TODO search $router, webhashrouter
     {
       component: SearchString,
       title: "axios",
