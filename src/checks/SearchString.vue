@@ -30,7 +30,6 @@
           :value="e.snippet"
           :offset="e.line"
         ></code-preview>
-        <!-- TODO handle snippet display -->
       </li>
     </ul>
   </div>
