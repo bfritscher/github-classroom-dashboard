@@ -18,7 +18,7 @@ function checkVite(repo) {
   return axios
     .get(`${toRepoAPI(repo.name)}/contents/vite.config.js`)
     .then((response) => {
-      const regexBase = /base:(.*?),/gms;
+      const regexBase = /base:(.*?)$/gms;
       const js = b64DecodeUnicode(response.data.content);
       let match = regexBase.exec(js);
       if (match) {

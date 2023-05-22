@@ -7,7 +7,10 @@
       target="_blank"
       >{{ props.repo.search[props.args.q].total_count }}</a
     >
-    <ul v-if="main.showDetails">
+    <ul
+      v-if="main.showDetails || props.args?.showDetails"
+      :class="{ showDetails: props.args?.showDetails }"
+    >
       <li
         v-for="(e, index) in props.repo.search[props.args.q].items"
         :key="index"
@@ -26,7 +29,7 @@
         >
         <code-preview
           class="inline-codepreview"
-          v-if="showPreview === e"
+          v-if="showPreview === e || props.args?.showDetails"
           :value="e.snippet"
           :offset="e.line"
         ></code-preview>
@@ -99,5 +102,10 @@ export default {
   position: absolute;
   right: 0;
   z-index: 99;
+}
+
+.showDetails .inline-codepreview {
+  position: relative;
+  max-width: 100%;
 }
 </style>

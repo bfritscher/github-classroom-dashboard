@@ -27,7 +27,7 @@ const code = computed(() => {
   content = content.replaceAll(/&lt;mark&gt;/g, "<mark>");
   content = content.replaceAll(/&lt;\/mark&gt;/g, "</mark>");
   return content;
-})
+});
 </script>
 <style scoped>
 pre {

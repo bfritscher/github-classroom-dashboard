@@ -9,7 +9,7 @@ const displayMobilePreview = ref(false);
 
 <template>
   <h2>Preview</h2>
-  <input type="checkbox" v-model="displayMobilePreview" /> Mobile
+  <label><input type="checkbox" v-model="displayMobilePreview" /> Mobile</label>
   <div id="preview" :class="{ noMobile: !displayMobilePreview }">
     <div
       class="preview"

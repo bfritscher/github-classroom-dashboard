@@ -102,7 +102,20 @@ const checksPresets = {
       },
     },
     // search is low because of rate limit add it at the end
-    // TODO search $router, webhashrouter
+    {
+      component: SearchString,
+      title: "WebHashHistory",
+      args: {
+        q: "createWebHashHistory in:file extension:js",
+      },
+    },
+    {
+      component: SearchString,
+      title: "$router",
+      args: {
+        q: "$router in:file extension:js extension:vue",
+      },
+    },
     {
       component: SearchString,
       title: "axios",

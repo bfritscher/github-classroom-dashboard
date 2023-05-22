@@ -83,8 +83,8 @@ function handleFileSelect(event) {
     <p>
       <input type="file" @change="handleFileSelect" />
       <br />
-      CSV file, first row: colum titles, columns starting with _ are ignored,
-      a column named repo must exist
+      CSV file, first row: colum titles, columns starting with _ are ignored, a
+      column named repo must exist
     </p>
   </div>
   <div v-if="evalState.evals.length > 0 || evalState.evalsDone.length > 0">

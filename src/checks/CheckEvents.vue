@@ -10,15 +10,17 @@ import { toRepo, toRepoAPI, b64DecodeUnicode } from "../filters.js";
 
 function checkEvents(repo) {
   repo.hasEvents = false;
-  return axios.get(`${toRepoAPI(repo.name)}/contents/events.md`).then((response) => {
-    repo.hasEvents = true;
-    /*
+  return axios
+    .get(`${toRepoAPI(repo.name)}/contents/events.md`)
+    .then((response) => {
+      repo.hasEvents = true;
+      /*
     const md = b64DecodeUnicode(response.data.content);
     const matches = md.matchAll(
       /(?<=#{1,6} (.*)\n(?:(?!#).*\n)*)(?=[+*-] (.*(?:\n(?![#+*-]).+)?))/g
     );
     */
-  });
+    });
 }
 
 function isCorrect(repo) {

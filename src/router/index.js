@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import ChecksView from "../views/ChecksView.vue";
 import PreviewView from "../views/PreviewView.vue";
+import SearchView from "../views/SearchView.vue";
 import RepoCreationChart from "../components/RepoCreationChart.vue";
 import Login from "../views/Login.vue";
 import { fetchAccount, store } from "../appwrite.js";
@@ -41,6 +42,14 @@ const router = createRouter({
       path: "/chart",
       name: "chart",
       component: RepoCreationChart,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: "/search",
+      name: "search",
+      component: SearchView,
       meta: {
         requiresAuth: true,
       },

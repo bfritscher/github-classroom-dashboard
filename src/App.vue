@@ -121,6 +121,7 @@ axios.interceptors.response.use((response) => {
       </select>
       <a @click="addAssignment()">+</a>
       <router-link to="/">Checks</router-link>
+      <router-link to="/search">Search</router-link>
       <router-link to="/preview">Preview</router-link>
       <router-link to="/chart">Chart</router-link>
       <router-link to="/evals">Upload Issues</router-link>
