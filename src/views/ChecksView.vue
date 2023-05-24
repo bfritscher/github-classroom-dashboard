@@ -26,6 +26,7 @@ import CheckRoutes from "../checks/CheckRoutes.vue";
 import CheckEvents from "../checks/CheckEvents.vue";
 import CheckFile from "../checks/CheckFile.vue";
 import CommitsChart from "../components/CommitsChart.vue";
+import InterschoolBuild from "../checks/InterschoolBuild.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -220,6 +221,7 @@ const checksPresets = {
         q: "__pycache__",
       },
     },
+    InterschoolBuild,
   ],
 };
 

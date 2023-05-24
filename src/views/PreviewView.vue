@@ -1,10 +1,25 @@
 <script setup>
-import { ref } from "vue";
-import { repoToGhPagesUrl } from "../filters.js";
+import { ref, computed } from "vue";
 import { main } from "../main.js";
-
+import { store } from "../appwrite.js";
 // UI states
 const displayMobilePreview = ref(false);
+
+function toPreviewUrl(repo) {
+  if (store?.course?.github_org === "heg-web") {
+    return `https://heg-web.github.io/${repo.name}`;
+  }
+  if (store?.course?.github_org === "heg-interschool") {
+    return `https://${repo.name
+      .replace("project-", "")
+      .replace("_", "-")}.rxq.ch`;
+  }
+}
+const sortedAssignments = computed(() => {
+  return Object.values(main.assignments).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+});
 </script>
 
 <template>
@@ -14,11 +29,11 @@ const displayMobilePreview = ref(false);
     <div
       class="preview"
       :class="{ 'preview-zoom': main.zoom == a }"
-      v-for="a in main.assignments"
+      v-for="a in sortedAssignments"
       :key="a.name"
     >
       <div>
-        <a target="_blank" :href="`https://heg-web.github.io/${a.name}`"
+        <a target="_blank" :href="toPreviewUrl(a)"
           >{{ a.name }}
           <span :class="{ correct: a.hasVendor, wrong: !a.hasVendor }">{{
             a.hasVendor
@@ -43,7 +58,7 @@ const displayMobilePreview = ref(false);
               height: 3000px;
               transform: scale3d(0.2, 0.2, 1) translate3d(-1300px, -6000px, 0);
             "
-            :src="repoToGhPagesUrl(a.name)"
+            :src="toPreviewUrl(a)"
           ></iframe>
         </div>
         <div v-if="displayMobilePreview">
@@ -54,7 +69,7 @@ const displayMobilePreview = ref(false);
               height: 3000px;
               transform: scale3d(0.2, 0.2, 1) translate3d(-2040px, -6000px, 0);
             "
-            :src="repoToGhPagesUrl(a.name)"
+            :src="toPreviewUrl(a)"
           ></iframe>
         </div>
         <div v-if="displayMobilePreview">
@@ -65,7 +80,7 @@ const displayMobilePreview = ref(false);
               height: 3000px;
               transform: scale3d(0.2, 0.2, 1) translate3d(-3200px, -6000px, 0);
             "
-            :src="repoToGhPagesUrl(a.name)"
+            :src="toPreviewUrl(a)"
           ></iframe>
         </div>
         <div v-if="!displayMobilePreview">
@@ -76,7 +91,7 @@ const displayMobilePreview = ref(false);
               height: 3000px;
               transform: scale3d(0.3, 0.3, 1) translate3d(-1850px, -3500px, 0);
             "
-            :src="repoToGhPagesUrl(a.name)"
+            :src="toPreviewUrl(a)"
           ></iframe>
         </div>
       </div>

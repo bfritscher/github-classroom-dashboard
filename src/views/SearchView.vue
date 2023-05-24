@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { main } from "../main.js";
 import SearchString from "../checks/SearchString.vue";
 const search = ref("extension:js extension:vue ");
@@ -9,6 +9,11 @@ async function doSearch() {
     await SearchString.check(repo, args);
   }
 }
+const sortedAssignments = computed(() => {
+  return Object.values(main.assignments).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+});
 </script>
 
 <template>
@@ -24,7 +29,7 @@ async function doSearch() {
     <button class="btn" @click="doSearch">Search</button>
   </div>
   <div class="search-results">
-    <div v-for="a in main.assignments" :key="a.name">
+    <div v-for="a in sortedAssignments" :key="a.name">
       <h3>{{ a.name }}</h3>
       <search-string
         :repo="a"
