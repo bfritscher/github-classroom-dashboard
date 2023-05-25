@@ -39,13 +39,13 @@ function createIssue() {
 function toMD(fields, data) {
   return fields.reduce((md, field) => {
     if (!isNaN(data[field]) && isNaN(field)) {
-      if (field.startsWith("Note")) {
+      if (field.startsWith("Note") || field.startsWith("Grade")) {
         md += `|**${field}** | **${data[field]}**|\n`;
       } else {
         md += `|${field} | ${data[field]}|\n`;
       }
     }
-    if (field === "Commentaires") {
+    if (field === "Commentaires" || field === "Comment") {
       md += `\n\n### ${field}\n${data[field]}\n`;
     }
     return md;
