@@ -221,7 +221,11 @@ const checksPresets = {
         q: "__pycache__",
       },
     },
-    InterschoolBuild,
+    {
+      component: InterschoolBuild,
+      title: InterschoolBuild.title,
+      onlyManualUpdate: true,
+    }
   ],
 };
 
@@ -345,7 +349,10 @@ async function refreshAssignment(repo) {
   }
 }
 
-async function refreshCheckComponent(repo, checkComponent) {
+async function refreshCheckComponent(repo, checkComponent, auto = true) {
+  if (checkComponent.onlyManualUpdate && auto) {
+    return;
+  }
   if (!repo.errors || repo.errors.constructor.name !== "WeakMap") {
     repo.errors = new WeakMap();
   }
@@ -375,7 +382,7 @@ async function refreshCheckComponent(repo, checkComponent) {
 
 function refreshCheckRow(checkComponent) {
   for (const repo of Object.values(main.assignments)) {
-    refreshCheckComponent(repo, checkComponent);
+    refreshCheckComponent(repo, checkComponent, false);
   }
 }
 
@@ -524,7 +531,7 @@ function getCommiterIndex(name) {
                                                                           : ''
                                                                       }`"
               @dblclick="
-                refreshCheckComponent(main.assignments[name], checkComponent)
+                refreshCheckComponent(main.assignments[name], checkComponent, false)
               "
             >
               <component
@@ -579,7 +586,7 @@ function getCommiterIndex(name) {
           v-for="(checkComponent, index) in assignmentsChecksFiltered"
           :key="index"
           @dblclick="
-            refreshCheckComponent(main.assignments[name], checkComponent)
+            refreshCheckComponent(main.assignments[name], checkComponent, false)
           "
           class="row"
         >
