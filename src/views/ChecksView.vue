@@ -244,6 +244,14 @@ const checksPresets = {
     },
     {
       component: SearchString,
+      title: "title",
+      args: {
+        extract: /<title>(.*?)<\/title>/,
+        q: "<title>.*?</title> in:file extension:html",
+      },
+    },
+    {
+      component: SearchString,
       title: "pycache",
       args: {
         q: "__pycache__",

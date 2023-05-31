@@ -5,8 +5,17 @@
         props.repo.name
       }+${toGithubSearch(props.args.q)}&type=code`"
       target="_blank"
-      >{{ props.repo.search[props.args.q].total_count }}</a
     >
+      <ul v-if="props.args.extract">
+        <li
+          v-for="(e, index) in props.repo.search[props.args.q].items"
+          :key="index"
+        >
+          {{ extract(e.snippet) }}
+        </li>
+      </ul>
+      <span v-else>{{ props.repo.search[props.args.q].total_count }}</span>
+    </a>
     <ul
       v-if="main.showDetails || props.args?.showDetails"
       :class="{ showDetails: props.args?.showDetails }"
@@ -86,6 +95,13 @@ export default {
       GITHUB_ORG,
       toGithubSearch,
       repoUrl: computed(() => toRepo(props.repo.name)),
+      extract(text) {
+        const m = props.args.extract.exec(text);
+        if (m && m.length > 1) {
+          return m[1];
+        }
+        return text;
+      },
     };
   },
 };
