@@ -222,6 +222,34 @@ const checksPresets = {
       },
     },
     {
+      component: SearchString,
+      title: "axios",
+      args: {
+        q: "axios in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "localhost",
+      args: {
+        q: "localhost in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "127.0.0.1",
+      args: {
+        q: "127.0.0.1 in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "pycache",
+      args: {
+        q: "__pycache__",
+      },
+    },
+    {
       component: InterschoolBuild,
       title: InterschoolBuild.title,
       onlyManualUpdate: true,
