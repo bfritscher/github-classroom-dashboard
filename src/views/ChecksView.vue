@@ -114,7 +114,7 @@ const checksPresets = {
       component: SearchString,
       title: "$router",
       args: {
-        q: "$router in:file extension:js extension:vue",
+        q: "/\\$router/ in:file extension:js extension:vue",
       },
     },
     {
