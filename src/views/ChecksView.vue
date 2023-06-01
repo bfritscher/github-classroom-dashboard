@@ -135,14 +135,14 @@ const checksPresets = {
       component: SearchString,
       title: "$emit",
       args: {
-        q: "$emit in:file extension:js extension:vue",
+        q: "/\\$emit/ in:file extension:js extension:vue",
       },
     },
     {
       component: SearchString,
       title: "$root",
       args: {
-        q: "$root in:file extension:js extension:vue",
+        q: "/\\$root/ in:file extension:js extension:vue",
       },
     },
     {
