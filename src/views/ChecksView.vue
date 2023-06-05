@@ -252,9 +252,17 @@ const checksPresets = {
     },
     {
       component: SearchString,
-      title: "pycache",
+      title: "permission_classes",
       args: {
-        q: "__pycache__",
+        extract: /permission_classes.*?=(.*)<\/mark>/,
+        q: "permission_classes.* in:file extension:py",
+      },
+    },
+    {
+      component: SearchString,
+      title: "node_modules",
+      args: {
+        q: "node_modules",
       },
     },
     {
