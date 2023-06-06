@@ -188,39 +188,9 @@ const checksPresets = {
     CheckCommits,
     CheckLastCommit,
     CheckBranches,
-    {
-      component: CheckFile,
-      title: "Models",
-      args: {
-        path: "backend/api/models.py",
-        regex: /class (.*?)\(/g,
-      },
-    },
-    {
-      component: CheckFile,
-      title: "Admin",
-      args: {
-        path: "backend/api/admin.py",
-        regex: /class (.*?)\(|register\(.*?\)/g,
-      },
-    },
-    {
-      component: CheckFile,
-      title: "Urls",
-      args: {
-        path: "backend/urls.py",
-        regex: /router.register\((.*?)\)/g,
-      },
-    },
+    /* vue */
     CheckDependencies,
     CheckRoutes,
-    {
-      component: SearchString,
-      title: "pycache",
-      args: {
-        q: "__pycache__",
-      },
-    },
     {
       component: SearchString,
       title: "axios",
@@ -252,6 +222,45 @@ const checksPresets = {
     },
     {
       component: SearchString,
+      title: "node_modules",
+      args: {
+        q: "node_modules",
+      },
+    },
+    {
+      component: SearchString,
+      title: "console.log",
+      args: {
+        q: "console.log in:file extension:js extension:vue",
+      },
+    },
+    /* python */
+    {
+      component: CheckFile,
+      title: "Models",
+      args: {
+        path: "backend/api/models.py",
+        regex: /class (.*?)\(/g,
+      },
+    },
+    {
+      component: CheckFile,
+      title: "Admin",
+      args: {
+        path: "backend/api/admin.py",
+        regex: /class (.*?)\(|register\(.*?\)/g,
+      },
+    },
+    {
+      component: CheckFile,
+      title: "Urls",
+      args: {
+        path: "backend/urls.py",
+        regex: /router.register\((.*?)\)/g,
+      },
+    },
+    {
+      component: SearchString,
       title: "permission_classes",
       args: {
         extract: /permission_classes.*?=(.*)<\/mark>/,
@@ -260,16 +269,37 @@ const checksPresets = {
     },
     {
       component: SearchString,
-      title: "node_modules",
+      title: "send_mail",
       args: {
-        q: "node_modules",
+        q: "/(send_mail|EmailMessage)/ in:file extension:py",
+      },
+    },
+    {
+      component: SearchString,
+      title: "test",
+      args: {
+        q: "test",
+      },
+    },
+    {
+      component: SearchString,
+      title: "fixtures",
+      args: {
+        q: "/fixtures?/",
+      },
+    },
+    {
+      component: SearchString,
+      title: "pycache",
+      args: {
+        q: "__pycache__",
       },
     },
     {
       component: InterschoolBuild,
       title: InterschoolBuild.title,
       onlyManualUpdate: true,
-    }
+    },
   ],
 };
 
@@ -289,9 +319,12 @@ const sortedAssignments = computed(() => {
   return Object.keys(main.assignments)
     .filter((a) => {
       const repoA = main.assignments[a];
+      if (!repoA.name) {
+        repoA.name = a;
+      }
       return (
-        repoA.name.includes(search.value) ||
-        repoA.users.some((u) => {
+        repoA.name?.includes(search.value) ||
+        repoA.users?.some((u) => {
           if (!githubUsernameLookup[u.login]) {
             console.log("no name for", u.login);
             return true;
@@ -323,6 +356,18 @@ function clear() {
     main.assignments = {};
     main.saveAssignments();
   }
+}
+
+function cleanup() {
+  const protectedKeys = ["name", "created_at", "baseDirOverride"];
+  Object.values(main.assignments).forEach((a) => {
+    for (const key in a) {
+      if (!protectedKeys.includes(key)) {
+        delete a[key];
+      }
+    }
+  });
+  main.saveAssignments();
 }
 
 function fetchAndRefresh() {
@@ -490,6 +535,7 @@ function getCommiterIndex(name) {
       </label>
       <span class="spacer"></span>
       <a :href="getUrls()" download="urls.txt">download urls.txt</a>
+      <button @click="cleanup()">cleanup</button>
       <button @click="clear()">clear</button>
     </div>
 
@@ -575,7 +621,11 @@ function getCommiterIndex(name) {
                                                                           : ''
                                                                       }`"
               @dblclick="
-                refreshCheckComponent(main.assignments[name], checkComponent, false)
+                refreshCheckComponent(
+                  main.assignments[name],
+                  checkComponent,
+                  false
+                )
               "
             >
               <component

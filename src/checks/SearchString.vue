@@ -12,13 +12,17 @@
           :key="index"
           class="link-tocode"
         >
-          <span @mouseenter="showPreview = e" @mouseleave="showPreview = false">{{ extract(e.snippet) }}</span>
+          <span
+            @mouseenter="showPreview = e"
+            @mouseleave="showPreview = false"
+            >{{ extract(e.snippet) }}</span
+          >
           <code-preview
-          class="inline-codepreview"
-          v-if="showPreview === e || props.args?.showDetails"
-          :value="e.snippet"
-          :offset="e.line"
-        ></code-preview>
+            class="inline-codepreview"
+            v-if="showPreview === e || props.args?.showDetails"
+            :value="e.snippet"
+            :offset="e.line"
+          ></code-preview>
         </li>
       </ul>
       <span v-else>{{ props.repo.search[props.args.q].total_count }}</span>
