@@ -32,7 +32,22 @@ async function getCommitsPage(repo, page) {
   return await axios
     .get(`${toRepoAPI(repo.name)}/commits?per_page=100&page=${page}`)
     .then(async (response) => {
-      repo.commits = repo.commits.concat(response.data);
+      const slimmedCommits = response.data.map((commit) => {
+        return {
+          commit: {
+            author: {
+              date: commit.commit?.author?.date,
+              name: commit.commit?.author?.name,
+            },
+            message: commit.commit?.message,
+          },
+          author: {
+            login: commit.author?.login,
+          },
+          sha: commit.sha,
+        };
+      });
+      repo.commits = repo.commits.concat(slimmedCommits);
       if (response.headers.link) {
         const match = response.headers.link.match(/page=(\d+)>; rel="(.*?)"/);
         if (match[2] === "next") {
