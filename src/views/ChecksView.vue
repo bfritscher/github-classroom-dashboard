@@ -237,6 +237,14 @@ const checksPresets = {
     /* python */
     {
       component: CheckFile,
+      title: "requirements.txt",
+      args: {
+        path: "requirements.txt",
+        regex: /^[^\s#].+$/gm,
+      },
+    },
+    {
+      component: CheckFile,
       title: "Models",
       args: {
         path: "backend/api/models.py",
