@@ -489,6 +489,30 @@ function getCommiterIndex(name) {
   }
   return main.commiterIndex.indexOf(name);
 }
+
+function csvExport() {
+  const rows = [...document.querySelectorAll("table thead tr,table tbody tr")];
+  const csv = rows
+    .map((row) => {
+      const cols = [...row.children];
+      return cols
+        .map(
+          (c) =>
+            `"${c.innerText.replaceAll(/"/g, '""').replaceAll(/\n/g, "\r\n")}"`
+        )
+        .join(";");
+    })
+    .join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", "export.csv");
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 </script>
 
 <template>
@@ -543,6 +567,7 @@ function getCommiterIndex(name) {
       </label>
       <span class="spacer"></span>
       <a :href="getUrls()" download="urls.txt">download urls.txt</a>
+      <button @click="csvExport()">export</button>
       <button @click="cleanup()">cleanup</button>
       <button @click="clear()">clear</button>
     </div>
