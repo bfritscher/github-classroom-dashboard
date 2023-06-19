@@ -2,6 +2,7 @@
   <a target="_blank" :href="fileBrowse">
     <template
       v-if="
+        props.args.regex &&
         props.repo.filesContentMatch &&
         props.repo.filesContentMatch[props.args.path]
       "
