@@ -27,6 +27,7 @@ import CheckEvents from "../checks/CheckEvents.vue";
 import CheckFile from "../checks/CheckFile.vue";
 import CommitsChart from "../components/CommitsChart.vue";
 import InterschoolBuild from "../checks/InterschoolBuild.vue";
+import CheckReport from "../checks/CheckReport.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -46,6 +47,28 @@ const CheckLastCommit = {
 
 const checksPresets = {
   basic: [CheckCollaborators, CheckCommits, CheckLastCommit],
+  git: [
+    CheckCollaborators,
+    CheckCommits,
+    CheckLastCommit,
+    CheckBranches,
+    {
+      component: DisplayValue,
+      title: "Main",
+      args: {
+        value: "hasMain",
+        href: (repo) => `${toRepo(repo.name)}/tree/main`,
+      },
+    },
+    CheckReport,
+    {
+      component: CheckFile,
+      title: "git.md",
+      args: {
+        path: "git.md",
+      },
+    },
+  ],
   vue: [
     CheckCollaborators,
     CheckCommits,
@@ -498,7 +521,11 @@ function csvExport() {
       return cols
         .map(
           (c) =>
-            `"${c.innerText.replaceAll(/"/g, '""').replaceAll(/\n/g, "\r\n")}"`
+            `"=""${c.innerText
+              .replaceAll(/"/g, '""')
+              .replaceAll(/\n/g, "\r\n")
+              .replaceAll("✅", 1)
+              .replaceAll("❌", 0)}"""`
         )
         .join(";");
     })
