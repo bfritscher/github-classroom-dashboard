@@ -28,6 +28,7 @@ import CheckFile from "../checks/CheckFile.vue";
 import CommitsChart from "../components/CommitsChart.vue";
 import InterschoolBuild from "../checks/InterschoolBuild.vue";
 import CheckReport from "../checks/CheckReport.vue";
+import WebGet from "../checks/WebGet.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -195,6 +196,14 @@ const checksPresets = {
       args: {
         q: "localStorage in:file extension:js extension:vue",
       },
+    },
+    {
+      component: WebGet,
+      args: {
+        url: (repo) => `https://pweb.bf0.ch/api/manual/${repo.name}`,
+      },
+      title: "update",
+      onlyManualUpdate: true,
     },
   ],
   "interschool-readme": [
