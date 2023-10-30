@@ -47,7 +47,7 @@ export async function fetchAccount() {
     store.account = await accountClient.get();
     store.courses = (
       await databases.listDocuments("production", "courses", [
-        Query.select(["year", "class", "name"]),
+        Query.select(["$id", "year", "class", "name"]),
         Query.orderDesc("year"),
         Query.orderAsc("name"),
       ])
@@ -88,7 +88,7 @@ export async function loadCourseById(id) {
   parseRoster(store.course.roster);
   store.course.assignments = (
     await databases.listDocuments("production", "assignments", [
-      Query.select(["name"]),
+      Query.select(["$id", "name"]),
       Query.equal("course", [store.course.$id]),
       Query.orderAsc("name"),
     ])
