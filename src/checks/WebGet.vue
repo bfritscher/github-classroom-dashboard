@@ -1,7 +1,5 @@
 <template>
-  <div class="text-center">
-    update
-  </div>
+  <div class="text-center">update</div>
 </template>
 <script>
 import axios from "axios";

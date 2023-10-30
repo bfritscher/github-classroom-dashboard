@@ -29,6 +29,7 @@ import CommitsChart from "../components/CommitsChart.vue";
 import InterschoolBuild from "../checks/InterschoolBuild.vue";
 import CheckReport from "../checks/CheckReport.vue";
 import WebGet from "../checks/WebGet.vue";
+import Comment from "../checks/Comment.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -340,6 +341,14 @@ const checksPresets = {
       title: InterschoolBuild.title,
       onlyManualUpdate: true,
     },
+  ],
+  frontend: [
+    CheckCollaborators,
+    CheckCommits,
+    CheckLastCommit,
+    CheckBranches,
+    CheckReadme,
+    Comment,
   ],
 };
 
