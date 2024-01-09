@@ -199,6 +199,13 @@ const checksPresets = {
       },
     },
     {
+      component: SearchString,
+      title: "firebase",
+      args: {
+        q: "firebase in:file extension:js extension:vue",
+      },
+    },
+    {
       component: WebGet,
       args: {
         url: (repo) => `https://pweb.bf0.ch/api/manual/${repo.name}`,
