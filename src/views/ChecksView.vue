@@ -30,6 +30,8 @@ import InterschoolBuild from "../checks/InterschoolBuild.vue";
 import CheckReport from "../checks/CheckReport.vue";
 import WebGet from "../checks/WebGet.vue";
 import Comment from "../checks/Comment.vue";
+import CheckFlutterDependencies from "../checks/CheckFlutterDependencies.vue";
+import CheckFlutterAndroidIcon from "../checks/CheckFlutterAndroidIcon.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -356,6 +358,107 @@ const checksPresets = {
     CheckBranches,
     CheckReadme,
     Comment,
+    CheckFlutterDependencies,
+    {
+      component: CheckFile,
+      title: "AndroidNamespace",
+      args: {
+        path: "android/app/build.gradle",
+        regex: /namespace "(.*?)"/g,
+      },
+    },
+    {
+      component: DisplayValue,
+      title: "Assets",
+      args: {
+        value: "flutterAssets",
+      },
+    },
+    CheckFlutterAndroidIcon,
+    {
+      component: SearchString,
+      title: "Localization",
+      args: {
+        q: "/AppLocalizations.of\\(context\\)/ in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "FirebaseAuth",
+      args: {
+        q: "FirebaseAuth in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "FirebaseFirestore",
+      args: {
+        q: "FirebaseFirestore in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "FirebaseStorage",
+      args: {
+        q: "FirebaseStorage in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "FirebaseFunctions",
+      args: {
+        q: "firebase.json",
+      },
+    },
+    {
+      component: SearchString,
+      title: "Animation",
+      args: {
+        q: "(Hero|AnimatedBuilder) in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "SharedPreferences",
+      args: {
+        q: "SharedPreferences in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "GoRoute",
+      args: {
+        q: "GoRoute in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "Provider",
+      args: {
+        q: "Provider in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "StatelessWidget",
+      args: {
+        q: "StatelessWidget in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "StatefulWidget",
+      args: {
+        q: "StatefulWidget in:file extension:dart",
+      },
+    },
+    {
+      component: SearchString,
+      title: "http",
+      args: {
+        q: "/http.(get|post)/ in:file extension:dart",
+      },
+    },
   ],
 };
 
@@ -660,14 +763,14 @@ function csvExport() {
                     ).isCorrect(main.assignments[name], checkComponent.args)
                     ? 'correct'
                     : (checkComponent.component
-                        ? checkComponent.component
-                        : checkComponent
-                      ).isCorrect(
-                        main.assignments[name],
-                        checkComponent.args
-                      ) === undefined
-                    ? ''
-                    : 'wrong'
+                          ? checkComponent.component
+                          : checkComponent
+                        ).isCorrect(
+                          main.assignments[name],
+                          checkComponent.args
+                        ) === undefined
+                      ? ''
+                      : 'wrong'
                   : ''
               } ${
                 main.assignments[name].errors &&
@@ -782,12 +885,14 @@ function csvExport() {
                   ).isCorrect(main.assignments[name], checkComponent.args)
                   ? 'correct'
                   : (checkComponent.component
-                      ? checkComponent.component
-                      : checkComponent
-                    ).isCorrect(main.assignments[name], checkComponent.args) ===
-                    undefined
-                  ? ''
-                  : 'wrong'
+                        ? checkComponent.component
+                        : checkComponent
+                      ).isCorrect(
+                        main.assignments[name],
+                        checkComponent.args
+                      ) === undefined
+                    ? ''
+                    : 'wrong'
                 : ''
             } ${
               main.assignments[name].errors &&

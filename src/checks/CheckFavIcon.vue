@@ -21,9 +21,9 @@ function checkIndex(repo) {
   return axios
     .get(`${toRepoAPI(repo.name)}/contents/index.html?ref=gh-pages`)
     .then((response) => {
-      const refexFavicon = /rel=".*?icon".*?href="(.*?)"/gm;
+      const regexFavicon = /rel=".*?icon".*?href="(.*?)"/gm;
       const html = b64DecodeUnicode(response.data.content);
-      let match = refexFavicon.exec(html);
+      let match = regexFavicon.exec(html);
       if (match) {
         if (match[1].startsWith("data:")) {
           repo.favicon = match[1];
