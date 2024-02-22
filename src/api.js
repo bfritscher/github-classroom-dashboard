@@ -7,6 +7,7 @@ const githubUserCache = {};
 
 export const githubUsernameLookup = reactive({});
 export const githubUsernameLookupPics = reactive({});
+export const roster = reactive([]);
 
 export function addNameToUserFromGithub(user) {
   if (githubUserCache[user.login]) {
@@ -30,6 +31,8 @@ export function parseRoster(csv) {
       download: false,
       header: true,
       complete: (results) => {
+        roster.length = 0;
+        roster.push(...results.data);
         results.data.forEach((e) => {
           githubUsernameLookup[e.github_username] = e.identifier;
         });

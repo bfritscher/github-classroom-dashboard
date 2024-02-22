@@ -26,7 +26,7 @@ ChartJS.register(
 );
 
 import { main } from "../main.js";
-import { githubUsernameLookup } from "../api.js";
+import { githubUsernameLookup, roster } from "../api.js";
 import { school_domain_colors } from "../colors.js";
 
 function extractDomain(email) {
@@ -37,21 +37,18 @@ function extractDomain(email) {
 }
 
 export default {
-  name: "BarChart",
+  name: "RepoCreationChart",
   components: { ChartJSLine },
   computed: {
     totalPerDomain() {
-      const totalPerDomain = Object.values(githubUsernameLookup).reduce(
-        (acc, value) => {
-          value = extractDomain(value);
-          if (!acc[value]) {
-            acc[value] = 0;
-          }
-          acc[value]++;
-          return acc;
-        },
-        {}
-      );
+      const totalPerDomain = roster.reduce((acc, value) => {
+        value = extractDomain(value.identifier);
+        if (!acc[value]) {
+          acc[value] = 0;
+        }
+        acc[value]++;
+        return acc;
+      }, {});
       totalPerDomain["total"] = Object.values(totalPerDomain).reduce(
         (acc, value) => acc + value,
         0
@@ -173,7 +170,7 @@ export default {
                 ? new Date(
                     this.sortedAssignments[
                       this.sortedAssignments.length - 1
-                    ].created_at
+                    ]?.created_at
                   )
                 : new Date().setHours(new Date().getHours() + 2),
           },
