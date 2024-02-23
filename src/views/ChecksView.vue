@@ -14,7 +14,7 @@ import CheckRelease from "../checks/CheckRelease.vue";
 import CheckGhPagesStatus from "../checks/CheckGhPagesStatus.vue";
 import CheckReadme from "../checks/CheckReadme.vue";
 import CheckReadmeMembers from "../checks/CheckReadmeMembers.vue";
-import CheckReadmeImages from "../checks/CheckReadmeImages.vue";
+// import CheckReadmeImages from "../checks/CheckReadmeImages.vue";
 import CheckIndex from "../checks/CheckIndex.vue";
 import CheckFavIcon from "../checks/CheckFavIcon.vue";
 import DisplayValue from "../checks/DisplayValue.vue";
@@ -23,7 +23,7 @@ import CheckDependencies from "../checks/CheckDependencies.vue";
 import CheckViteConfig from "../checks/CheckViteConfig.vue";
 import CheckEslint from "../checks/CheckEslint.vue";
 import CheckRoutes from "../checks/CheckRoutes.vue";
-import CheckEvents from "../checks/CheckEvents.vue";
+// import CheckEvents from "../checks/CheckEvents.vue";
 import CheckFile from "../checks/CheckFile.vue";
 import CommitsChart from "../components/CommitsChart.vue";
 import InterschoolBuild from "../checks/InterschoolBuild.vue";
@@ -32,6 +32,7 @@ import WebGet from "../checks/WebGet.vue";
 import Comment from "../checks/Comment.vue";
 import CheckFlutterDependencies from "../checks/CheckFlutterDependencies.vue";
 import CheckFlutterAndroidIcon from "../checks/CheckFlutterAndroidIcon.vue";
+import CheckVueLevel1 from "../checks/CheckVueLevel1.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -216,14 +217,13 @@ const checksPresets = {
       onlyManualUpdate: true,
     },
   ],
-  "interschool-readme": [
+  "interschool-level1": [
     CheckCollaborators,
     CheckCommits,
     CheckLastCommit,
     CheckBranches,
-    CheckEvents,
     CheckReadmeMembers,
-    CheckReadmeImages,
+    CheckVueLevel1,
   ],
   "interschool-project": [
     CheckCollaborators,
