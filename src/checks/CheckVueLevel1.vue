@@ -3,7 +3,11 @@
     {{ count }}
   </a>
   <div v-if="main.showDetails">
-    <div v-for="(value, key) in repo.level1" :key="key" class="text-nowrap detail">
+    <div
+      v-for="(value, key) in repo.level1"
+      :key="key"
+      class="text-nowrap detail"
+    >
       <b>{{ key }}:</b> <span>{{ value ? "✅" : "❌" }}</span>
     </div>
   </div>
@@ -22,7 +26,6 @@ function checkIndex(repo) {
       const query = [
         "Products",
         "data()",
-        "Add to Cart",
         "methods",
         "computed",
         "axios",
@@ -32,6 +35,8 @@ function checkIndex(repo) {
       for (const q of query) {
         repo.level1[q] = html.includes(q);
       }
+      const addToCartRegex = new RegExp("add\\s*to\\s*cart", "i");
+      repo.level1["addToCart"] = addToCartRegex.test(html);
     });
 }
 
@@ -61,5 +66,4 @@ export default {
 b {
   float: left;
 }
-
 </style>
