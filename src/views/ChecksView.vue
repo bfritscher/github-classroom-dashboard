@@ -33,6 +33,7 @@ import Comment from "../checks/Comment.vue";
 import CheckFlutterDependencies from "../checks/CheckFlutterDependencies.vue";
 import CheckFlutterAndroidIcon from "../checks/CheckFlutterAndroidIcon.vue";
 import CheckVueLevel1 from "../checks/CheckVueLevel1.vue";
+import CheckVueLevel2 from "../checks/CheckVueLevel2.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -224,6 +225,13 @@ const checksPresets = {
     CheckBranches,
     CheckReadmeMembers,
     CheckVueLevel1,
+  ],
+  "interschool-level2": [
+    CheckCollaborators,
+    CheckCommits,
+    CheckLastCommit,
+    CheckBranches,
+    CheckVueLevel2,
   ],
   "interschool-project": [
     CheckCollaborators,
