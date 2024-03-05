@@ -1,5 +1,5 @@
 <template>
-  <a target="_blank" :href="`${repoUrl}/blob/index.html`" class="text-nowrap">
+  <a target="_blank" :href="`${repoUrl}`" class="text-nowrap">
     {{ count }}
   </a>
   <div v-if="main.showDetails">
@@ -40,7 +40,6 @@ function checkIndex(repo) {
       .get(`${toRepoAPI(repo.name)}/contents/src/views/OrderAdd.vue`)
       .then((response) => {
         const query = [
-          "add()",
           "localStorage.setItem",
           "v-model",
           "select",
