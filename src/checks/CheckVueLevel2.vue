@@ -35,6 +35,8 @@ function checkIndex(repo) {
         for (const q of query) {
           repo.level2[q] = html.includes(q);
         }
+        const deleteRegex = new RegExp("delete", "i");
+        repo.level2["delete"] = deleteRegex.test(html);
       }),
     axios
       .get(`${toRepoAPI(repo.name)}/contents/src/views/OrderAdd.vue`)
