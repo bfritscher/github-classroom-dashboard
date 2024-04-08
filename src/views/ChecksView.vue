@@ -238,6 +238,16 @@ const checksPresets = {
     CheckCommits,
     CheckLastCommit,
     CheckBranches,
+    /* team.md */
+    {
+      component: CheckFile,
+      title: "team.md",
+      args: {
+        path: "team.md",
+        regex: /^# (.+)|- (.+)/gm,
+      },
+    },
+    Comment,
     /* vue */
     CheckDependencies,
     CheckRoutes,
