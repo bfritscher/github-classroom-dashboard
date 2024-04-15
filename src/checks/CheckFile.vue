@@ -81,6 +81,9 @@ export default {
   title: "File",
   check: getFile,
   isCorrect,
+  sortValue(repo, args) {
+    return repo.filesContentMatch[args.path].length;
+  },
   total(repos) {
     return repos.reduce((total, repo) => {
       return total + (repo.hasEvents ? 1 : 0);

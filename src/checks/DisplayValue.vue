@@ -34,6 +34,9 @@ export default {
   title: "Display",
   check: async () => {},
   isCorrect,
+  sortValue(repo, args) {
+    return getValue(repo, args);
+  },
   total(repos, args) {
     let total = 0;
     let seen_bool = false;
