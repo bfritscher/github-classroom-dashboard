@@ -37,19 +37,49 @@ function createIssue() {
 }
 
 function toMD(fields, data) {
+  // if any field includes {w:[floats]} enable flag
+  const hasWeights = fields.some((f) => f.includes("{w:"));
+
+  let headers = `## Evaluation ${data.repo}\n\n| Critères | Points |`;
+  if (hasWeights) {
+    headers += " Coefficients |";
+  }
+  headers += "\n|---|---:|";
+  if (hasWeights) {
+    headers += "---:|";
+  }
+  headers += "\n";
+
   return fields.reduce((md, field) => {
-    if (!isNaN(data[field]) && isNaN(field)) {
+    if (!isNaN(data[field]) && isNaN(field) && data[field].trim() !== "") {
       if (field.startsWith("Note") || field.startsWith("Grade")) {
-        md += `|**${field}** | **${data[field]}**|\n`;
+        md += `|**<br>${field}<br><br>** | **<br>${data[field]}<br><br>**|`;
+        if (hasWeights) {
+          md += " |";
+        }
+        md += `\n`;
       } else {
-        md += `|${field} | ${data[field]}|\n`;
+        if (hasWeights) {
+          const weightString = field.match(/{w:([0-9.]+)}/);
+          let weight = "";
+          if (weightString) {
+            weight = parseFloat(weightString[1]);
+          }
+          const fieldStripped = field.replace(/{w:[0-9.]+}/, "");
+          md += `|${fieldStripped} | ${data[field]}| ${weight}|\n`;
+        } else {
+          md += `|${field} | ${data[field]}|\n`;
+        }
       }
     }
-    if (field === "Commentaires" || field === "Comment") {
+    if (
+      (field === "Commentaires" || field === "Comment") &&
+      data[field].trim() !== ""
+    ) {
       md += `\n\n### ${field}\n${data[field]}\n`;
     }
     return md;
-  }, `## Evaluation ${data.repo}\n\n| Critères | Points |\n|---|---:|\n`);
+  }, headers);
 }
 
 function parseCSV(file) {
@@ -84,7 +114,9 @@ function handleFileSelect(event) {
       <input type="file" @change="handleFileSelect" />
       <br />
       CSV file, first row: colum titles, columns starting with _ are ignored, a
-      column named repo must exist
+      column named repo must exist, Comment or Commentaires will be displayed as text. 
+      Field starting with Note or Grade will be displayed as bold.
+      {w:x.z} is extracted from titles as weights
     </p>
   </div>
   <div v-if="evalState.evals.length > 0 || evalState.evalsDone.length > 0">
@@ -115,5 +147,9 @@ function handleFileSelect(event) {
   box-shadow: rgb(0 0 0 / 10%) 0px 4px 12px;
   max-width: 800px;
   margin: 20px auto;
+}
+
+.eval td {
+  height: 1em;
 }
 </style>
