@@ -37,6 +37,7 @@ import CheckVueLevel2 from "../checks/CheckVueLevel2.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
+import Papa from "papaparse";
 
 const CheckLastCommit = {
   component: DisplayValue,
@@ -685,21 +686,17 @@ function getCommiterIndex(name) {
 
 function csvExport() {
   const rows = [...document.querySelectorAll("table thead tr,table tbody tr")];
-  const csv = rows
-    .map((row) => {
+  const csv = Papa.unparse(
+    rows.map((row) => {
       const cols = [...row.children];
-      return cols
-        .map(
-          (c) =>
-            `"=""${c.innerText
-              .replaceAll(/"/g, '""')
-              .replaceAll(/\n/g, "\r\n")
-              .replaceAll("✅", 1)
-              .replaceAll("❌", 0)}"""`
-        )
-        .join(";");
-    })
-    .join("\r\n");
+      return cols.map((c) =>
+        c.innerText.replaceAll("✅", 1).replaceAll("❌", 0)
+      );
+    }),
+    {
+      quotes: true,
+    }
+  );
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
