@@ -37,6 +37,7 @@ import CheckVueLevel2 from "../checks/CheckVueLevel2.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
+import Papa from "papaparse";
 
 const CheckLastCommit = {
   component: DisplayValue,
@@ -238,6 +239,16 @@ const checksPresets = {
     CheckCommits,
     CheckLastCommit,
     CheckBranches,
+    /* team.md */
+    {
+      component: CheckFile,
+      title: "team.md",
+      args: {
+        path: "team.md",
+        regex: /^# (.+)|- (.+)/gm,
+      },
+    },
+    Comment,
     /* vue */
     CheckDependencies,
     CheckRoutes,
@@ -473,6 +484,18 @@ const checksPresets = {
 const search = ref("");
 const cutOff = ref(4);
 
+const sortIndex = ref(-1);
+const sortOrder = ref("asc");
+const sortByProject = (repo) => repo.name;
+
+const toggleSort = (index) => {
+  if (sortIndex.value === index) {
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+  } else {
+    sortIndex.value = index;
+  }
+};
+
 const assignmentsChecksFiltered = computed(() => {
   return (checksPresets[store.assignment.check] || []).filter((c) => {
     if (c.component === SearchString) {
@@ -503,7 +526,19 @@ const sortedAssignments = computed(() => {
     .sort((a, b) => {
       const repoA = main.assignments[a];
       const repoB = main.assignments[b];
-      return repoA.name.localeCompare(repoB.name);
+      const sortCheck = assignmentsChecksFiltered.value[sortIndex.value];
+      const sortValue =
+        sortIndex.value === -1
+          ? sortByProject
+          : sortCheck.sortValue || sortCheck.component?.sortValue;
+      const aVal = sortValue(repoA, sortCheck?.args);
+      const bVal = sortValue(repoB, sortCheck?.args);
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortOrder.value === "asc"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+      return sortOrder.value === "asc" ? aVal - bVal : bVal - aVal;
     });
 });
 
@@ -651,21 +686,17 @@ function getCommiterIndex(name) {
 
 function csvExport() {
   const rows = [...document.querySelectorAll("table thead tr,table tbody tr")];
-  const csv = rows
-    .map((row) => {
+  const csv = Papa.unparse(
+    rows.map((row) => {
       const cols = [...row.children];
-      return cols
-        .map(
-          (c) =>
-            `"=""${c.innerText
-              .replaceAll(/"/g, '""')
-              .replaceAll(/\n/g, "\r\n")
-              .replaceAll("✅", 1)
-              .replaceAll("❌", 0)}"""`
-        )
-        .join(";");
-    })
-    .join("\r\n");
+      return cols.map((c) =>
+        c.innerText.replaceAll("✅", 1).replaceAll("❌", 0)
+      );
+    }),
+    {
+      quotes: true,
+    }
+  );
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
@@ -741,13 +772,36 @@ function csvExport() {
         <thead>
           <tr>
             <th @click="refreshAll()">🗘</th>
-            <th>Project</th>
+            <th>
+              Project
+              <span
+                @click="toggleSort(-1)"
+                class="sort"
+                :class="{
+                  'sort-active': sortIndex == -1,
+                  'sort-asc': sortOrder == 'asc',
+                  'sort-desc': sortOrder == 'desc',
+                }"
+                >&nbsp;</span
+              >
+            </th>
             <th
               v-for="(check, index) in assignmentsChecksFiltered"
               :key="index"
               @click="refreshCheckRow(check)"
             >
               {{ check.title }}
+              <span
+                v-if="check.component?.sortValue || check.sortValue"
+                @click.stop="toggleSort(index)"
+                class="sort"
+                :class="{
+                  'sort-active': sortIndex == index,
+                  'sort-asc': sortOrder == 'asc',
+                  'sort-desc': sortOrder == 'desc',
+                }"
+                >&nbsp;</span
+              >
             </th>
           </tr>
         </thead>
@@ -1047,6 +1101,30 @@ th {
 th:hover {
   background-color: #509ee3;
   color: white;
+}
+
+.sort {
+  cursor: pointer;
+  width: 14px;
+  display: inline-block;
+}
+
+th:hover .sort {
+  color: white;
+}
+
+.sort:hover.sort-asc:after,
+.sort-active.sort-asc:after {
+  content: "▲";
+}
+
+.sort:hover.sort-desc:after,
+.sort-active.sort-desc:after {
+  content: "▼";
+}
+
+.sort-active {
+  color: #509ee3;
 }
 
 tbody td {

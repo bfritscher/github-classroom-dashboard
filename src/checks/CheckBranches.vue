@@ -37,6 +37,9 @@ export default {
   },
   title: "Branches",
   check: checkBranches,
+  sortValue(repo) {
+    return repo.branches?.length || 0;
+  },
   setup(props) {
     return { props, main, repoUrl: computed(() => toRepoAPI(props.repo.name)) };
   },
