@@ -34,6 +34,8 @@ import CheckFlutterDependencies from "../checks/CheckFlutterDependencies.vue";
 import CheckFlutterAndroidIcon from "../checks/CheckFlutterAndroidIcon.vue";
 import CheckVueLevel1 from "../checks/CheckVueLevel1.vue";
 import CheckVueLevel2 from "../checks/CheckVueLevel2.vue";
+import CheckIssues from "../checks/CheckIssues.vue";
+import CheckProjectNames from "../checks/CheckProjectNames.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -375,7 +377,9 @@ const checksPresets = {
     CheckCommits,
     CheckLastCommit,
     CheckBranches,
+    CheckIssues,
     CheckReadme,
+    CheckProjectNames,
     Comment,
     CheckFlutterDependencies,
     {
@@ -383,7 +387,7 @@ const checksPresets = {
       title: "AndroidNamespace",
       args: {
         path: "android/app/build.gradle",
-        regex: /namespace "(.*?)"/g,
+        regex: /namespace = "(.*?)"/g,
       },
     },
     {

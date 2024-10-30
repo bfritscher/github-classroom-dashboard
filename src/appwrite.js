@@ -37,7 +37,7 @@ export function loginGithub() {
     "github",
     window.location.href,
     window.location.href,
-    ["read:org", "repo"]
+    ["read:org", "repo", "read:project"]
   );
 }
 
