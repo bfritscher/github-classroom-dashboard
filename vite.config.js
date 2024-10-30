@@ -15,6 +15,7 @@ export default defineConfig({
     }),
   ],
   base:
+    // eslint-disable-next-line
     process.env.NODE_ENV === "production"
       ? "/github-classroom-dashboard/"
       : "/",
