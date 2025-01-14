@@ -378,6 +378,15 @@ const checksPresets = {
     CheckLastCommit,
     CheckBranches,
     CheckIssues,
+    {
+      component: CheckFile,
+      title: "Version",
+      args: {
+        path: "pubspec.yaml",
+        regex: /version:(.+)/g,
+        alwaysShowMatches: true,
+      },
+    },
     CheckReadme,
     CheckProjectNames,
     Comment,

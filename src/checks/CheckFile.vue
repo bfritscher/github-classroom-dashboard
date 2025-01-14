@@ -7,10 +7,10 @@
         props.repo.filesContentMatch[props.args.path]
       "
     >
-      <div class="text-right">
+      <div class="text-right" v-if="!props.args.alwaysShowMatches">
         {{ props.repo.filesContentMatch[props.args.path].length }}
       </div>
-      <ul v-if="main.showDetails">
+      <ul v-if="main.showDetails || props.args.alwaysShowMatches">
         <li
           v-for="m in props.repo.filesContentMatch[props.args.path]"
           :key="m"
