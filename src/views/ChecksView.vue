@@ -1045,7 +1045,7 @@ function csvExport() {
             {{ c.commit.author.date.replace("T", " ").slice(0, 16) }}
             <a
               target="_blank"
-              :href="c.html_url"
+              :href="`${toRepo(main.commitsRepo)}/commit/${c.sha}`"
               :class="{ merge: c.commit.message.indexOf('Merge') == 0 }"
               >{{ c.commit.message }}</a
             >

@@ -34,6 +34,7 @@ export const main = reactive({
   showCards: false,
   assignments: {},
   commits: [],
+  commitsRepo: "",
   commiterIndex: [],
 });
 

@@ -157,6 +157,7 @@ export default {
           main.commits = [];
           return;
         }
+        main.commitsRepo = props.repo.name;
         main.commits = props.repo.commits;
       },
     };
