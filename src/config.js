@@ -11,6 +11,7 @@ export const USERNAME_BLACKLIST = [
   "template",
   "bryan-spahr",
   "schumachm",
+  "jaggiismael",
 ];
 export function setGithubOrg(org) {
   GITHUB_ORG = org;
