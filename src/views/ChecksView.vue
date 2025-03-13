@@ -36,6 +36,8 @@ import CheckVueLevel1 from "../checks/CheckVueLevel1.vue";
 import CheckVueLevel2 from "../checks/CheckVueLevel2.vue";
 import CheckIssues from "../checks/CheckIssues.vue";
 import CheckProjectNames from "../checks/CheckProjectNames.vue";
+import CheckDjangoLevel1 from "../checks/CheckDjangoLevel1.vue";
+import CheckDjangoLevel2 from "../checks/CheckDjangoLevel2.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -235,6 +237,20 @@ const checksPresets = {
     CheckLastCommit,
     CheckBranches,
     CheckVueLevel2,
+  ],
+  "interschool-django1": [
+    CheckCollaborators,
+    CheckCommits,
+    CheckLastCommit,
+    CheckBranches,
+    CheckDjangoLevel1,
+  ],
+  "interschool-django2": [
+    CheckCollaborators,
+    CheckCommits,
+    CheckLastCommit,
+    CheckBranches,
+    CheckDjangoLevel2,
   ],
   "interschool-project": [
     CheckCollaborators,
