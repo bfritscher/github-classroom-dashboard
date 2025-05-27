@@ -160,6 +160,13 @@ const checksPresets = {
     },
     {
       component: SearchString,
+      title: "fetch",
+      args: {
+        q: "fetch in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
       title: "props",
       args: {
         q: "props in:file extension:js extension:vue",
