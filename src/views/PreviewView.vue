@@ -6,13 +6,18 @@ import { store } from "../appwrite.js";
 const displayMobilePreview = ref(false);
 
 function toPreviewUrl(repo) {
+  let url;
   if (store?.course?.github_org === "heg-web") {
-    return `https://heg-web.github.io/${repo.name}`;
+    url = `https://heg-web.github.io/${repo.name}`;
   }
   if (store?.course?.github_org === "heg-interschool") {
-    return `https://${repo.name
+    url = `https://${repo.name
       .replace("project-", "")
       .replace("_", "-")}.rxq.ch`;
+  }
+  if (url) {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}v=${Date.now()}`;
   }
 }
 const sortedAssignments = computed(() => {
