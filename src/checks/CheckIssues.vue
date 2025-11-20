@@ -18,8 +18,15 @@ async function getIssuesPage(repo, page) {
           repo.issues[issue.state] = 0;
         }
         repo.issues[issue.state]++;
-        console.log(issue.state);
-        console.log(issue);
+        repo.issues.data[issue.number] = {
+          number: issue.number,
+          title: issue.title,
+          state: issue.state,
+          // labels: issue.labels.map((label) => label.name),
+          parent: issue.parent_issue_url
+            ? parseInt(issue.parent_issue_url.split("/").pop(), 10)
+            : null,
+        };
       });
       if (response.headers.link) {
         const match = response.headers.link.match(/page=(\d+)>; rel="(.*?)"/);
@@ -34,6 +41,7 @@ function getIssues(repo) {
   repo.issues = {
     open: 0,
     closed: 0,
+    data: {},
   };
   return getIssuesPage(repo, 1);
 }

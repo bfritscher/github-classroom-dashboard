@@ -38,6 +38,7 @@ import CheckIssues from "../checks/CheckIssues.vue";
 import CheckProjectNames from "../checks/CheckProjectNames.vue";
 import CheckDjangoLevel1 from "../checks/CheckDjangoLevel1.vue";
 import CheckDjangoLevel2 from "../checks/CheckDjangoLevel2.vue";
+import DisplayIssue from "../checks/DisplayIssue.vue";
 
 import { formatDistanceToNowStrict } from "date-fns";
 import { committer_colors } from "../colors.js";
@@ -112,6 +113,177 @@ const checksPresets = {
     CheckIndex,
     CheckFavIcon,
     CheckBranches,
+    {
+      component: DisplayValue,
+      title: "Tags",
+      args: {
+        value: "releases",
+      },
+    },
+    {
+      component: DisplayValue,
+      title: "Style",
+      args: { value: "style" },
+    },
+    CheckDependencies,
+    CheckEslint,
+    CheckRoutes,
+    {
+      component: DisplayValue,
+      title: "Route Params",
+      args: {
+        value: (repo) => {
+          return repo.routes?.filter((r) => r.includes(":"));
+        },
+      },
+    },
+    // search is low because of rate limit add it at the end
+    {
+      component: SearchString,
+      title: "WebHashHistory",
+      args: {
+        q: "createWebHashHistory in:file extension:js",
+      },
+    },
+    {
+      component: SearchString,
+      title: "$router",
+      args: {
+        q: "/\\$router/ in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "axios",
+      args: {
+        q: "axios in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "fetch",
+      args: {
+        q: "fetch in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "props",
+      args: {
+        q: "props in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "$emit",
+      args: {
+        q: "/\\$emit/ in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "$root",
+      args: {
+        q: "/\\$root/ in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "JSON.parse",
+      args: {
+        q: "JSON.parse in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "JSON.stringify",
+      args: {
+        q: "JSON.stringify in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "console.log",
+      args: {
+        q: "console.log in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "localStorage",
+      args: {
+        q: "localStorage in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
+      title: "firebase",
+      args: {
+        q: "firebase in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: WebGet,
+      args: {
+        url: (repo) => `https://pweb.bf0.ch/api/manual/${repo.name}`,
+      },
+      title: "update",
+      onlyManualUpdate: true,
+    },
+  ],
+  "vue-lia": [
+    CheckCollaborators,
+    CheckCommits,
+    CheckLastCommit,
+    {
+      component: DisplayIssue,
+      title: "Epic 1",
+      args: {
+        title: "Epic 1",
+      },
+    },
+    {
+      component: DisplayIssue,
+      title: "Epic 2",
+      args: {
+        title: "Epic 2",
+      },
+    },
+    {
+      component: DisplayIssue,
+      title: "Epic 3",
+      args: {
+        title: "Epic 3",
+      },
+    },
+    {
+      component: DisplayIssue,
+      title: "Epic 4",
+      args: {
+        title: "Epic 4",
+      },
+    },
+    {
+      component: DisplayIssue,
+      title: "Epic 5",
+      args: {
+        title: "Epic 5",
+      },
+    },
+    {
+      component: DisplayValue,
+      title: "Main",
+      args: {
+        value: "hasMain",
+        href: (repo) => `${toRepo(repo.name)}/tree/main`,
+      },
+    },
+    CheckGhPagesStatus,
+    CheckViteConfig,
+    CheckIndex,
+    CheckFavIcon,
+    CheckBranches,
+    CheckIssues,
     {
       component: DisplayValue,
       title: "Tags",
