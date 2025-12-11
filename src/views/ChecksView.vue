@@ -590,8 +590,8 @@ const checksPresets = {
       component: CheckFile,
       title: "AndroidNamespace",
       args: {
-        path: "android/app/build.gradle",
-        regex: /namespace = "(.*?)"/g,
+        path: "android/app/build.gradle.kts",
+        regex: /applicationId = "(.*?)"/g,
       },
     },
     {
