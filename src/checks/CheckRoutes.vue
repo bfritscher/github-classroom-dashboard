@@ -21,7 +21,7 @@ import { computed } from "vue";
 import { b64DecodeUnicode, toRepoAPI, toRepo } from "../filters.js";
 import { main } from "../main.js";
 
-const regexRoutePath = /path:.*?["'](.+)["']/g;
+const regexRoutePath = /path:.*?["'](.+?)["']/g;
 
 function checkRoutes(repo) {
   repo.routes = [];
