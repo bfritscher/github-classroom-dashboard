@@ -125,6 +125,13 @@ const checksPresets = {
       title: "Style",
       args: { value: "style" },
     },
+    {
+      component: SearchString,
+      title: "StyleVue",
+      args: {
+        q: "style= in:file extension:vue",
+      },
+    },
     CheckDependencies,
     CheckEslint,
     CheckRoutes,
@@ -168,16 +175,23 @@ const checksPresets = {
     },
     {
       component: SearchString,
+      title: "script setup",
+      args: {
+        q: "/<script setup>/ in:file extension:js extension:vue",
+      },
+    },
+    {
+      component: SearchString,
       title: "props",
       args: {
-        q: "props in:file extension:js extension:vue",
+        q: "/props|defineProps/ in:file extension:js extension:vue",
       },
     },
     {
       component: SearchString,
       title: "$emit",
       args: {
-        q: "/\\$emit/ in:file extension:js extension:vue",
+        q: "/\\$emit|defineEmits|emits:|emit./ in:file extension:js extension:vue",
       },
     },
     {
