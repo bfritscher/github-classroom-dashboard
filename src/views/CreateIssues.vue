@@ -39,6 +39,7 @@ function createIssue() {
 function toMD(fields, data) {
   // if any field includes {w:[floats]} enable flag
   const hasWeights = fields.some((f) => f.includes("{w:"));
+  const isSectionHeader = (value) => /^\*[^*].*[^*]\*$/.test(value);
 
   let headers = `## Evaluation ${data.repo}\n\n| Critères | Points |`;
   if (hasWeights) {
@@ -51,9 +52,22 @@ function toMD(fields, data) {
   headers += "\n";
 
   return fields.reduce((md, field) => {
-    if (!isNaN(data[field]) && isNaN(field) && data[field].trim() !== "") {
+    const value = (data[field] || "").trim();
+    const fieldWithoutWeight = field.replace(/{w:[0-9.]+}/, "").trim();
+
+    if (isSectionHeader(fieldWithoutWeight) && isNaN(field)) {
+      const sectionLabel = fieldWithoutWeight.slice(1, -1).trim();
+      md += `|<br>**${sectionLabel}** |  |`;
+      if (hasWeights) {
+        md += " |";
+      }
+      md += "\n";
+      return md;
+    }
+
+    if (!isNaN(value) && isNaN(field) && value !== "") {
       if (field.startsWith("Note") || field.startsWith("Grade")) {
-        md += `|**<br>${field}<br><br>** | **<br>${data[field]}<br><br>**|`;
+        md += `|**<br>${field}<br><br>** | **<br>${value}<br><br>**|`;
         if (hasWeights) {
           md += " |";
         }
@@ -66,17 +80,17 @@ function toMD(fields, data) {
             weight = parseFloat(weightString[1]);
           }
           const fieldStripped = field.replace(/{w:[0-9.]+}/, "");
-          md += `|${fieldStripped} | ${data[field]}| ${weight}|\n`;
+          md += `|${fieldStripped} | ${value}| ${weight}|\n`;
         } else {
-          md += `|${field} | ${data[field]}|\n`;
+          md += `|${field} | ${value}|\n`;
         }
       }
     }
     if (
       (field === "Commentaires" || field === "Comment") &&
-      data[field].trim() !== ""
+      value !== ""
     ) {
-      md += `\n\n### ${field}\n${data[field]}\n`;
+      md += `\n\n### ${field}\n${value}\n`;
     }
     return md;
   }, headers);
@@ -116,7 +130,7 @@ function handleFileSelect(event) {
       CSV file, first row: colum titles, columns starting with _ are ignored, a
       column named repo must exist, Comment or Commentaires will be displayed as text. 
       Field starting with Note or Grade will be displayed as bold.
-      {w:x.z} is extracted from titles as weights
+      {w:x.z} is extracted from titles as weights. Columns with title *Section* create a separator row using that cell value.
     </p>
   </div>
   <div v-if="evalState.evals.length > 0 || evalState.evalsDone.length > 0">
